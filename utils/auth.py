@@ -22,6 +22,7 @@ class AuthManager:
 
     def registerUsers(self, name, lastname, user, password): # registra un usario
         users = self.loadUsers()
+        user = user.lower().strip()
 
         ############### validaciones ###############
 
@@ -65,6 +66,7 @@ class AuthManager:
 
     def loginUsers(self, user, password): # iniciar sesion con un usario
         users = self.loadUsers()
+        user = user.lower().strip()
 
         if user not in users: # verificar si existe el usario
             return {
@@ -82,3 +84,23 @@ class AuthManager:
             "status": "success",
             "message": "Inicio de sesión exitoso"
         }
+
+    def searchUsers(self, searchTerm): # buscar usuario en el json
+        users = self.loadUsers()
+        results = []
+        searchTerms = searchTerm.lower().split()
+
+        for username, userData in users.items():
+            if all(
+                    any(term in campo.lower() for campo in
+                        [userData['nombre'], userData['apellido'], username])
+                    for term in searchTerms
+            ):
+                result = {
+                    'username': username,
+                    'nombre': userData['nombre'],
+                    'apellido': userData['apellido']
+                }
+                results.append(result)
+
+        return results

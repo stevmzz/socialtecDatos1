@@ -7,8 +7,13 @@ class ClientGUI:
         self.window = tk.Tk()
         self.window.title("SocialTec Client")
         self.window.geometry("300x400")
+        self.window.protocol("WM_DELETE_WINDOW", self.onClosing)
+        self.client = ClientApplication(autoconnect = False)
         self.client = ClientApplication()
         self.createLoginFrame()
+
+    def onClosing(self):
+        self.window.destroy() # cerrar ventana principal
 
     def createLoginFrame(self): # crea el frame del login
         for widget in self.window.winfo_children(): # recorre todos los elementos y los borra
@@ -78,7 +83,7 @@ class ClientGUI:
         back_btn = tk.Button(registerFrame, text = "Volver al login", command = self.createLoginFrame)
         back_btn.pack()
 
-    def login(self):
+    def login(self): # intenta loguear usuario
         username = self.usernameEntry.get()
         password = self.passwordEntry.get()
 
@@ -92,12 +97,13 @@ class ClientGUI:
 
             if result['status'] == 'success':
                 messagebox.showinfo("Login", result['message'])
+                self.createSearchFrame()
             else:
                 messagebox.showerror("error", result['message'])
         except Exception as e:
             messagebox.showerror("error", str(e))
 
-    def register(self):
+    def register(self): # intenta registrar ususario
         name = self.nameEntry.get()
         lastname = self.lastnameEntry.get()
         username = self.regUsernameEntry.get()
@@ -118,6 +124,51 @@ class ClientGUI:
                 messagebox.showerror("Registration Failed", result['message'])
         except Exception as e:
             messagebox.showerror("Connection Error", str(e))
+
+    def createSearchFrame(self): # crea el frame de la zona de busqueda
+        for widget in self.window.winfo_children():
+            widget.destroy()
+
+        searchFrame = tk.Frame(self.window)
+        searchFrame.pack(expand=True, fill='both')
+
+        tk.Label(searchFrame, text="Buscar Personas").pack()
+
+        # espacio de buscar
+        self.searchEntry = tk.Entry(searchFrame, width=25)
+        self.searchEntry.pack()
+
+        # boton de buscar
+        searchButton = tk.Button(searchFrame, text="Buscar", command=self.search)
+        searchButton.pack()
+
+        # para mostrar resultados
+        self.resultsFrame = tk.Frame(searchFrame)
+        self.resultsFrame.pack(expand=True, fill='both')
+
+    def search(self): # funcion para buscar personas
+        searchTerm = self.searchEntry.get()
+
+        if not searchTerm:
+            messagebox.showerror("Error", "meta algo")
+            return
+
+        try:
+            self.client.connectToServer()
+            results = self.client.searchUsers(searchTerm)
+
+            for widget in self.resultsFrame.winfo_children():
+                widget.destroy()
+
+            if not results:
+                tk.Label(self.resultsFrame, text="no hay gente").pack()
+            else:
+                for user in results:
+                    userFrame = tk.Frame(self.resultsFrame)
+                    userFrame.pack(fill = 'x', pady = 5)
+                    tk.Label(userFrame, text=f"{user['nombre']} {user['apellido']} (@{user['username']})").pack(side='left')
+        except Exception:
+            print("error")
 
     def start(self):
         self.window.mainloop()

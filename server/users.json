@@ -1,1 +1,12 @@
-{}
+{
+    "user123456": {
+        "nombre": "steven",
+        "apellido": "aguilar",
+        "contrase\u00f1a": "user123456"
+    },
+    "user1234567": {
+        "nombre": "alberto",
+        "apellido": "alvarez",
+        "contrase\u00f1a": "user1234567"
+    }
+}
