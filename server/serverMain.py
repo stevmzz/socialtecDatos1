@@ -1,21 +1,36 @@
 from utils.network import NetworkManager
 from utils.auth import AuthManager
+from server.serverGUI import ServerGUI
 import threading
 import time
+import sys # para redirigir prints
 
 class SocialGraph:
     def __init__(self):
         pass
 
 class ServerApplication:
-    def __init__(self):
+    class GuiLogger:  # clase para redirigir los prints
+        def __init__(self, gui):
+            self.gui = gui
+
+        def write(self, message):
+            if message.strip():
+                self.gui.logMessage(message.strip())
+
+        def flush(self):
+            pass  # necesario para compatibilidad con sys.stdout
+
+    def __init__(self, gui):
         self.networkManager = NetworkManager()
         self.authManager = AuthManager()
         self.socialGraph = SocialGraph()
         self.serverThread = None
         self.running = False
+        self.gui = gui
 
     def start(self): # funcion para iniciar el server mediante hilos
+        sys.stdout = self.GuiLogger(self.gui)
         self.running = True
         self.serverThread = threading.Thread(target=self.runServer)
         self.serverThread.start()
@@ -34,8 +49,10 @@ class ServerApplication:
             self.serverThread.join()
 
 def main():
-    server = ServerApplication() # inicia
+    gui = ServerGUI() # para enviar los prints
+    server = ServerApplication(gui) # inicia
     server.start() # inicia el server
+    gui.start() # inicia el bucle de gui
 
 if __name__ == "__main__":
     main()
