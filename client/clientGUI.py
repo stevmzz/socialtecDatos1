@@ -7,8 +7,13 @@ class ClientGUI:
         self.window = tk.Tk()
         self.window.title("SocialTec Client")
         self.window.geometry("300x400")
+        self.window.protocol("WM_DELETE_WINDOW", self.onClosing)
+        self.client = ClientApplication(autoconnect = False)
         self.client = ClientApplication()
         self.createLoginFrame()
+
+    def onClosing(self):
+        self.window.destroy() # cerrar ventana principal
 
     def createLoginFrame(self): # crea el frame del login
         for widget in self.window.winfo_children(): # recorre todos los elementos y los borra
@@ -162,14 +167,8 @@ class ClientGUI:
                     userFrame = tk.Frame(self.resultsFrame)
                     userFrame.pack(fill = 'x', pady = 5)
                     tk.Label(userFrame, text=f"{user['nombre']} {user['apellido']} (@{user['username']})").pack(side='left')
-
-                    addFriendButton = tk.Button(userFrame, text = "Agregar", command = lambda u = user: self.addFriend(u['username']))
-                    addFriendButton.pack(side = 'right')
         except Exception:
             print("error")
-
-    def addFriend(self, username):
-        messagebox.showinfo("aun no", f"agregar amigo {username}")
 
     def start(self):
         self.window.mainloop()

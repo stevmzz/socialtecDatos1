@@ -85,15 +85,12 @@ class AuthManager:
             "message": "Inicio de sesión exitoso"
         }
 
-    def searchUsers(self, searchTerm):
+    def searchUsers(self, searchTerm): # buscar usuario en el json
         users = self.loadUsers()
         results = []
-
-        # Convertir término de búsqueda a minúsculas
         searchTerms = searchTerm.lower().split()
 
         for username, userData in users.items():
-            # Buscar si TODOS los términos coinciden parcialmente
             if all(
                     any(term in campo.lower() for campo in
                         [userData['nombre'], userData['apellido'], username])
