@@ -8,7 +8,7 @@ class ClientApplication:
         self.port = port
         self.clientSocket = None
 
-    def connectToServer(self):
+    def connectToServer(self): # funcion para que el cliente se conecte el server
         try:
             self.clientSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # crear socket
 
@@ -21,6 +21,9 @@ class ClientApplication:
 
         except Exception as e:
             print(f"Error conectando al servidor: {e}")
+        finally:
+            if self.clientSocket:
+                self.clientSocket.close()
 
     def sendMessage(self, message): # funcion para enviar mensaje
         if self.clientSocket:

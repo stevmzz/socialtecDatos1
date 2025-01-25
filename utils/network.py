@@ -8,8 +8,9 @@ class NetworkManager:
         self.serverSocket = None
         self.clients = []
 
-    def startServer(self):
+    def startServer(self): # funcion para crear el server con sockets
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # crea un objeto socket
+        self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # reutiliza socket
         self.serverSocket.bind((self.host, self.port)) # asocia el socket con un puerto y un host
         self.serverSocket.listen(100) # permite que el server acepte hasta 100 conecciones
         print(f"Servidor iniciado en ( {self.host} ) en el puerto ( {self.port} )")
@@ -27,7 +28,7 @@ class NetworkManager:
             if self.serverSocket:
                 self.serverSocket.close()
 
-    def handleClient(self, clientSocket):
+    def handleClient(self, clientSocket): # funcion para manejar clientes
         try:
             while True:
                 data = clientSocket.recv(1024) # recibe info del cliente hasta de 1024 bytes
