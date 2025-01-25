@@ -22,6 +22,7 @@ class AuthManager:
 
     def registerUsers(self, name, lastname, user, password): # registra un usario
         users = self.loadUsers()
+        user = user.lower().strip()
 
         ############### validaciones ###############
 
@@ -65,6 +66,7 @@ class AuthManager:
 
     def loginUsers(self, user, password): # iniciar sesion con un usario
         users = self.loadUsers()
+        user = user.lower().strip()
 
         if user not in users: # verificar si existe el usario
             return {
@@ -82,3 +84,26 @@ class AuthManager:
             "status": "success",
             "message": "Inicio de sesión exitoso"
         }
+
+    def searchUsers(self, searchTerm):
+        users = self.loadUsers()
+        results = []
+
+        # Convertir término de búsqueda a minúsculas
+        searchTerms = searchTerm.lower().split()
+
+        for username, userData in users.items():
+            # Buscar si TODOS los términos coinciden parcialmente
+            if all(
+                    any(term in campo.lower() for campo in
+                        [userData['nombre'], userData['apellido'], username])
+                    for term in searchTerms
+            ):
+                result = {
+                    'username': username,
+                    'nombre': userData['nombre'],
+                    'apellido': userData['apellido']
+                }
+                results.append(result)
+
+        return results

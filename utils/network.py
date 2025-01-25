@@ -1,3 +1,4 @@
+import json
 import socket
 import threading
 from utils.auth import AuthManager
@@ -45,6 +46,8 @@ class NetworkManager:
                     response = self.handleLogin(message)
                 elif message.startswith("REGISTER:"):
                     response = self.handleRegister(message)
+                elif message.startswith("SEARCH:"):
+                    response = self.handleSearchUser(message)
                 else:
                     response = "Recibido"
 
@@ -54,12 +57,19 @@ class NetworkManager:
         finally:
             clientSocket.close()
 
-    def handleLogin(self, message): #
+    def handleLogin(self, message): # funcion para menajar el login
         _, username, password = message.split(":") # parsea los datos
         login_result = self.authManager.loginUsers(username, password) # loguear usario
-        return login_result['message']
+        return json.dumps(login_result)
 
-    def handleRegister(self, message):
+    def handleRegister(self, message): # funcion para menejar el registro
         _, name, lastname, username, password = message.split(":")
         register_result = self.authManager.registerUsers(name, lastname, username, password)
         return register_result['message']
+
+    def handleSearchUser(self, message): # funcion para el manejo de busqueda de usuarios
+        _, searchTerm = message.split(":")
+        users = self.authManager.searchUsers(searchTerm)
+        return json.dumps(users) # devolver lista de usarios que coinciden
+
+

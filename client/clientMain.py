@@ -1,6 +1,7 @@
 from utils.network import NetworkManager
 from utils.auth import AuthManager
 import socket
+import json
 
 class ClientApplication:
     def __init__(self, host='localhost', port=5000):
@@ -17,43 +18,40 @@ class ClientApplication:
             # conectar al servidor
             self.clientSocket.connect((self.host, self.port))
             print(f"Conectado al servidor en ( {self.host} ) en el puerto ( {self.port} )")
-
-            self.sendMessage("hola") # mensaje de prueba
-            self.receiveMessage() # recibir respuesta del server
-
         except Exception as e:
             print(f"Error conectando al servidor: {e}")
-        finally:
-            if self.clientSocket:
-                self.clientSocket.close()
 
     def sendMessage(self, message): # funcion para enviar mensaje
-        if self.clientSocket:
-            try:
-                self.clientSocket.send(message.encode('utf-8'))
-                print(f"Mensaje enviado: {message}")
-            except Exception as e:
-                print(f"Error enviando mensaje: {e}")
+        try:
+            if not self.clientSocket:
+                self.connectToServer()
+            self.clientSocket.send(message.encode('utf-8'))
+            print(f"Mensaje enviado: {message}")
+        except Exception as e:
+            print(f"Error enviando mensaje: {e}")
+            self.clientSocket = None
 
     def receiveMessage(self): # funcion para recibir mensaje
-        if self.clientSocket:
-            try:
-                data = self.clientSocket.recv(1024)
-                print(f"Respuesta del servidor: {data.decode('utf-8')}")
-            except Exception as e:
-                print(f"Error recibiendo mensaje: {e}")
+        try:
+            if not self.clientSocket:
+                self.connectToServer()
+            data = self.clientSocket.recv(1024)
+            received_message = data.decode('utf-8')
+            print(f"Respuesta del servidor: {received_message}")
+            return received_message
+        except Exception as e:
+            print(f"Error recibiendo mensaje: {e}")
+            self.clientSocket = None
+            return ""
 
     def login(self, username, password):
         try:
-            localResult = self.authManager.loginUsers(username, password)
+            self.sendMessage(f"LOGIN:{username}:{password}")
+            server_response = self.receiveMessage()
 
-            if localResult['status'] == 'success':
-                self.sendMessage(f"LOGIN:{username}:{password}") # envia el mensaje de login
-                server_response = self.receiveMessage()
-
-                return localResult
-            else:
-                return localResult
+            # Parsear respuesta JSON del servidor
+            response_data = json.loads(server_response)
+            return response_data  # Retornar JSON completo
         except Exception as e:
             return {
                 "status": "error",
@@ -81,6 +79,28 @@ class ClientApplication:
         finally:
             if self.clientSocket:
                 self.clientSocket.close()
+
+    def searchUsers(self, searchTerm):
+        try:
+            self.connectToServer()
+            self.sendMessage(f"SEARCH:{searchTerm}")
+            response = self.receiveMessage()
+
+            # Manejar respuesta vacía o inválida
+            if not response or response == "[]":
+                return []
+
+            return json.loads(response)
+        except json.JSONDecodeError:
+            print("Error decodificando respuesta del servidor")
+            return []
+        except Exception as e:
+            print(f"Search error: {e}")
+            return []
+        finally:
+            if self.clientSocket:
+                self.clientSocket.close()
+                self.clientSocket = None
 
 def main():
     client = ClientApplication() # inicia
