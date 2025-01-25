@@ -7,6 +7,8 @@ class ClientApplication:
         self.host = host
         self.port = port
         self.clientSocket = None
+        self.networkManager = NetworkManager(host, port)
+        self.authManager = AuthManager()
 
     def connectToServer(self): # funcion para que el cliente se conecte el server
         try:
@@ -41,9 +43,51 @@ class ClientApplication:
             except Exception as e:
                 print(f"Error recibiendo mensaje: {e}")
 
+    def login(self, username, password):
+        try:
+            localResult = self.authManager.loginUsers(username, password)
+
+            if localResult['status'] == 'success':
+                self.sendMessage(f"LOGIN:{username}:{password}") # envia el mensaje de login
+                server_response = self.receiveMessage()
+
+                return localResult
+            else:
+                return localResult
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Login error: {str(e)}"
+            }
+        finally:
+            if self.clientSocket:
+                self.clientSocket.close()
+
+    def register(self, name, lastname, username, password):
+        try:
+            localResult = self.authManager.registerUsers(name, lastname, username, password)
+
+            if localResult['status'] == 'success':
+                self.sendMessage(f"REGISTER:{name}:{lastname}:{username}:{password}") # envia mensaje de registrar
+                server_response = self.receiveMessage()
+                return localResult
+            else:
+                return localResult
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Registration error: {str(e)}"
+            }
+        finally:
+            if self.clientSocket:
+                self.clientSocket.close()
+
 def main():
     client = ClientApplication() # inicia
     client.connectToServer() # se conecta al server
+    from clientGUI import ClientGUI
+    client_gui = ClientGUI()
+    client_gui.start() # inicia el gui del cliente
 
 if __name__ == "__main__":
     main()

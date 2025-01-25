@@ -1,12 +1,14 @@
 import socket
 import threading
+from utils.auth import AuthManager
 
 class NetworkManager:
     def __init__(self, host = 'localhost', port = 5000):
         self.host = host
         self.port = port
         self.serverSocket = None
-        self.clients = []
+        self.clients = {}
+        self.authManager = AuthManager()
 
     def startServer(self): # funcion para crear el server con sockets
         self.serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # crea un objeto socket
@@ -38,9 +40,26 @@ class NetworkManager:
                 message = data.decode('utf-8')
                 print(f"Mensaje recibido: {message}")
 
-                response = "Recibido".encode('utf-8')
-                clientSocket.send(response)
+                # manejar diferentes tipos de mensajes
+                if message.startswith("LOGIN:"):
+                    response = self.handleLogin(message)
+                elif message.startswith("REGISTER:"):
+                    response = self.handleRegister(message)
+                else:
+                    response = "Recibido"
+
+                clientSocket.send(response.encode('utf-8'))
         except Exception as e:
             print(f"Error manejando cliente: {e}")
         finally:
             clientSocket.close()
+
+    def handleLogin(self, message): #
+        _, username, password = message.split(":") # parsea los datos
+        login_result = self.authManager.loginUsers(username, password) # loguear usario
+        return login_result['message']
+
+    def handleRegister(self, message):
+        _, name, lastname, username, password = message.split(":")
+        register_result = self.authManager.registerUsers(name, lastname, username, password)
+        return register_result['message']

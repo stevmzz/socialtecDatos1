@@ -23,7 +23,6 @@ class ServerApplication:
 
     def __init__(self, gui):
         self.networkManager = NetworkManager()
-        self.authManager = AuthManager()
         self.socialGraph = SocialGraph()
         self.serverThread = None
         self.running = False
