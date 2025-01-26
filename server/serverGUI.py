@@ -42,6 +42,55 @@ class ServerGUI:
         statsButton = tk.Button(self.navFrame, text="Estadísticas", command=self.createStatsFrame)
         statsButton.pack(side=tk.LEFT, padx=5, pady=5)
 
+        searchPathButton = tk.Button(self.navFrame, text="Buscar Path", command=self.createSeachFriendsPath)
+        searchPathButton.pack(side=tk.LEFT, padx=5, pady=5)
+
+    def createSeachFriendsPath(self): # crea el frame de las stats
+        for widget in self.contentFrame.winfo_children():
+            widget.destroy()
+
+        self.logActive = False
+
+        pathLabel = tk.Label(self.contentFrame, text="Buscar Path")
+        pathLabel.pack()
+
+        # entry para amigo "a"
+        entryFriendA = tk.Entry(self.contentFrame, width=25)
+        entryFriendA.pack()
+
+        # entry para amigo "b"
+        entryFriendB = tk.Entry(self.contentFrame, width=25)
+        entryFriendB.pack()
+
+        # boton de buscar path
+        searchPathButton = tk.Button(self.contentFrame, text="Buscar Path", command=self.searchPath)
+        searchPathButton.pack()
+
+    def searchPath(self):
+        userA = self.contentFrame.winfo_children()[1].get() # entryFriendA
+        userB = self.contentFrame.winfo_children()[2].get() # entryFriendB
+
+        # limpiar resultados previos
+        for widget in self.contentFrame.winfo_children():
+            if isinstance(widget, tk.Label) and widget.cget('text') != "Buscar Path":
+                widget.destroy()
+
+        # buscar path
+        path = self.socialGraph.findFriendPath(userA, userB)
+
+        # mostrar resultados
+        if path:
+            if len(path) > 2:
+                result = f"Path encontrado: {' -> '.join(path)}"
+            else:
+                result = f"Son amigos directos: {path[0]} y {path[1]}"
+
+            resultLabel = tk.Label(self.contentFrame, text=result)
+            resultLabel.pack()
+        else:
+            resultLabel = tk.Label(self.contentFrame, text="No existe path")
+            resultLabel.pack()
+
     def createLogFrame(self): # funcion para crear el frame del log
         for widget in self.contentFrame.winfo_children(): # borrar todo lo que haya
             widget.destroy()

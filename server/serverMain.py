@@ -59,6 +59,36 @@ class SocialGraph:
     def getFriends(self, username): # obtiene la lista de amigos de un usuario
         return list(self.graph.get(username, set()))
 
+    def findFriendPath(self, user1, user2): # funcion para buscar el path entre amigos
+        # verificar si los usuarios existen en el grafo
+        if user1 not in self.graph or user2 not in self.graph:
+            return None
+
+        # si ya son amigos directos
+        if user2 in self.graph[user1]:
+            return [user1, user2]
+
+        queue = [[user1]] # cola para bfs
+        visited = set([user1]) # conjunto para rastrear usuarios visitados
+
+        while queue: # mientras haya caminos
+            path = queue.pop(0) # tomar el primero camino
+            lastUser = path[-1] # obtener el ultimo usuario en el camino actual
+
+            # revisar amigos del ultimo usuario en el path
+            for friend in self.graph.get(lastUser, set()):
+                if friend == user2:
+                    # camino encontrado
+                    return path + [friend]
+
+                if friend not in visited: # si el amigo no ha sido visitado
+                    visited.add(friend) # marcar como visitado
+                    newPath = list(path) # actualizamos el path
+                    newPath.append(friend) # añadimos el amigo
+                    queue.append(newPath) # añadimos el nuevo camino a la cosa para seguir buscando
+
+        return None # no se encontró camino
+
 class ServerApplication:
     class GuiLogger:  # clase para redirigir los prints
         def __init__(self, gui):
