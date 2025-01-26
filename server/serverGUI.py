@@ -1,6 +1,9 @@
 import tkinter as tk
-from tkinter import scrolledtext
+from tkinter import scrolledtext, Toplevel, Button
 import threading
+import networkx as nx
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class ServerGUI:
     def __init__(self, socialGraph, title="Socialtec Server"):
@@ -10,6 +13,9 @@ class ServerGUI:
         self.socialGraph = socialGraph  # referencia al grafo
         self.logMessages = [] # lista para almacenar mensajes del server
         self.logActive = False # rastrear si el log está activo
+
+        import matplotlib
+        matplotlib.use('TkAgg') # usar con tkinter
 
         # main frame
         self.mainFrame = tk.Frame(self.window)
@@ -64,10 +70,46 @@ class ServerGUI:
         for widget in self.contentFrame.winfo_children():
             widget.destroy()
 
-        self.logActive = False
+        self.logActive = False # marcar el log como desactivado
 
-        graphLabel = tk.Label(self.contentFrame, text="Grafo Social")
-        graphLabel.pack()
+        # crear figura de matplotlib
+        fig, ax = plt.subplots(figsize=(10, 8))
+
+        # crear grafo dirigido
+        G = nx.DiGraph()
+
+        # añadir conexiones
+        for user, friends in self.socialGraph.graph.items():
+            for friend in friends:
+                # verificar si la amistad es mutua
+                if user in self.socialGraph.graph.get(friend, set()):
+                    G.add_edge(user, friend, color = 'grey', style = 'solid', width = 2)
+                else:
+                    G.add_edge(user, friend, color = 'grey', style = 'dashed', width = 1)
+
+        pos = nx.spring_layout(G, k=0.5) # calcular posiciones de los nodos
+
+        # dibujar nodos
+        nx.draw_networkx_nodes(G, pos, node_color = 'grey', node_size = 300, ax = ax)
+
+        # nombre de nodos
+        nx.draw_networkx_labels(G, pos, font_size = 8, ax = ax)
+
+        # dibujar aristas con diferentes estilos
+        edges = G.edges() # obtiene las aristas
+        edgeColors = [G[u][v]['color'] for u, v in edges]
+        edgeStyles = [G[u][v]['style'] for u, v in edges]
+        edgeWidths = [G[u][v]['width'] for u, v in edges]
+        nx.draw_networkx_edges(G, pos, edge_color = edgeColors, style = edgeStyles, width = edgeWidths, arrows = True, arrowsize = 10, ax = ax)
+
+        ax.axis('off') # oculta ejes visuales (un cuadro)
+
+        # incrustar grafico de matplotlib en tkinter
+        canvas = FigureCanvasTkAgg(fig, master = self.contentFrame)
+        canvasWidget = canvas.get_tk_widget()
+        canvasWidget.pack(fill = tk.BOTH, expand = True)
+        canvas.draw() # dibujar canvas
+        plt.close(fig) # limpiar grafico
 
     def createStatsFrame(self): # crea el frame de las stats
         for widget in self.contentFrame.winfo_children():
@@ -87,9 +129,6 @@ class ServerGUI:
                 self.logArea.see(tk.END)
         except Exception as e:
             print(f"Error logging message: {e}")
-
-    def showGraph(self): # funcion para mostrar el grafo
-        pass
 
     def start(self): # iniciar ventana
         self.window.mainloop()
