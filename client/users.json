@@ -8,5 +8,15 @@
         "nombre": "alberto",
         "apellido": "alvarez",
         "contrase\u00f1a": "user1234567"
+    },
+    "user12345678": {
+        "nombre": "karoll",
+        "apellido": "najera",
+        "contrase\u00f1a": "user12345678"
+    },
+    "user123456789": {
+        "nombre": "fabiola",
+        "apellido": "molina",
+        "contrase\u00f1a": "user123456789"
     }
 }

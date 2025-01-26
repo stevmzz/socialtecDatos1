@@ -48,6 +48,10 @@ class NetworkManager:
                     response = self.handleRegister(message)
                 elif message.startswith("SEARCH:"):
                     response = self.handleSearchUser(message)
+                elif message.startswith("ADDFRIEND:"):
+                    response = self.handleAddFriend(message)
+                elif message.startswith("ISFRIEND:"):
+                    response = self.handleIsFriend(message)
                 else:
                     response = "Recibido"
 
@@ -72,4 +76,44 @@ class NetworkManager:
         users = self.authManager.searchUsers(searchTerm)
         return json.dumps(users) # devolver lista de usarios que coinciden
 
+    def handleAddFriend(self, message):
+        try:
+            _, sender, receiver = message.split(":")
+            from server.serverMain import SocialGraph
+            socialGraph = SocialGraph()
+            socialGraph.loadFriendships()
 
+            if socialGraph.addFriend(sender, receiver):
+                socialGraph.saveFriendships()
+
+                return json.dumps({
+                    "status": "success",
+                    "message": f"{sender} añadió a {receiver} como amigo"
+                })
+        except Exception as e:
+            return json.dumps({
+                "status": "error",
+                "message": f"Error añadiendo amigo: {str(e)}"
+            })
+
+    def handleIsFriend(self, message):
+        try:
+            _, user1, user2 = message.split(":")
+            from server.serverMain import SocialGraph
+            socialGraph = SocialGraph()
+            socialGraph.loadFriendships()
+
+            isFriend = socialGraph.isFriends(user1, user2)
+
+            return json.dumps({
+                "status": "success",
+                "isFriend": isFriend
+            })
+        except Exception as e:
+            return json.dumps({
+                "status": "error",
+                "message": f"Error verificando amistad: {str(e)}"
+            })
+
+    def handleRemoveFriend(self, message):
+        pass
