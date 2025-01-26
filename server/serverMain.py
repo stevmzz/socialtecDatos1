@@ -71,9 +71,9 @@ class ServerApplication:
         def flush(self):
             pass  # necesario para compatibilidad con sys.stdout
 
-    def __init__(self, gui):
+    def __init__(self, gui, socialGraph):
         self.networkManager = NetworkManager()
-        self.socialGraph = SocialGraph()
+        self.socialGraph = socialGraph
         self.serverThread = None
         self.running = False
         self.gui = gui
@@ -98,8 +98,10 @@ class ServerApplication:
             self.serverThread.join()
 
 def main():
-    gui = ServerGUI() # para enviar los prints
-    server = ServerApplication(gui) # inicia
+    socialGraph = SocialGraph() # inicializa el grafo
+    socialGraph.loadFriendships() # carga las amistades existentes
+    gui = ServerGUI(socialGraph) # para enviar los prints y el grafo
+    server = ServerApplication(gui, socialGraph) # inicia
     server.start() # inicia el server
     gui.start() # inicia el bucle de gui
 
