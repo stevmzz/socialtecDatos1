@@ -120,6 +120,8 @@ class ServerGUI:
             widget.destroy()
 
         self.logActive = False # marcar el log como desactivado
+        self.socialGraph.loadFriendships() # recargar los datos mas recientes para actualizar grafo
+        plt.clf() # limpiar cualquier figura existente para actualizar el grafo
 
         # crear figura de matplotlib
         fig, ax = plt.subplots(figsize=(10, 8))
@@ -137,6 +139,9 @@ class ServerGUI:
                     G.add_edge(user, friend, color = 'grey', style = 'dashed', width = 1)
 
         pos = nx.spring_layout(G, k=0.5) # calcular posiciones de los nodos
+
+        # limpiar el eje actual
+        ax.clear()
 
         # dibujar nodos
         nx.draw_networkx_nodes(G, pos, node_color = 'grey', node_size = 300, ax = ax)
