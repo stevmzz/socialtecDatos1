@@ -202,14 +202,39 @@ class ServerGUI:
         canvas.draw() # dibujar canvas
         plt.close(fig) # limpiar grafico
 
-    def createStatsFrame(self): # crea el frame de las stats
+    def createStatsFrame(self):
         for widget in self.contentFrame.winfo_children():
             widget.destroy()
 
         self.logActive = False
 
-        statsLabel = tk.Label(self.contentFrame, text="Estadísticas\n\n(En desarrollo)", font=self.retroFont, bg="#c0c0c0", relief="sunken", borderwidth=2, padx=20, pady=20)
-        statsLabel.pack(expand=True)
+        # frame para stats
+        statsFrame = tk.Frame(self.contentFrame, relief="sunken", borderwidth=2, bg='#c0c0c0')
+        statsFrame.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
+
+        # titulo
+        titleLabel = tk.Label(statsFrame, text="Estadísticas de Socialtec", font=self.retroFont, bg='#c0c0c0')
+        titleLabel.pack(pady=10)
+
+        # frame para mostrar stats
+        resultsFrame = tk.Frame(statsFrame, bg='#c0c0c0')
+        resultsFrame.pack(pady=10, fill=tk.BOTH, expand=True)
+
+        # crear frames individuales para cada estadistica
+        # usuario con mas amigos
+        maxFriendsFrame = tk.Frame(resultsFrame, relief="raised", borderwidth=2, bg='#c0c0c0')
+        maxFriendsFrame.pack(fill=tk.X, padx=20, pady=5)
+        tk.Label(maxFriendsFrame, text="Usuario con más amigos:", font=self.retroFont, bg='#c0c0c0').pack(side=tk.LEFT, padx=10, pady=10)
+
+        # usuario con menos amigos
+        minFriendsFrame = tk.Frame(resultsFrame, relief="raised", borderwidth=2, bg='#c0c0c0')
+        minFriendsFrame.pack(fill=tk.X, padx=20, pady=5)
+        tk.Label(minFriendsFrame, text="Usuario con menos amigos:", font=self.retroFont, bg='#c0c0c0').pack(side=tk.LEFT, padx=10, pady=10)
+
+        # promedio de amigos
+        avgFriendsFrame = tk.Frame(resultsFrame, relief="raised", borderwidth=2, bg='#c0c0c0')
+        avgFriendsFrame.pack(fill=tk.X, padx=20, pady=5)
+        tk.Label(avgFriendsFrame, text="Promedio de amigos por usuario:", font=self.retroFont, bg='#c0c0c0').pack(side=tk.LEFT, padx=10, pady=10)
 
     def logMessage(self, message): # funcion para mostrar los mensajes del server
         self.logMessages.append(message)
