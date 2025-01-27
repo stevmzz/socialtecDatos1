@@ -1,48 +1,59 @@
 import tkinter as tk
-from tkinter import scrolledtext, Toplevel, Button
+from tkinter import scrolledtext, Toplevel, Button, font
 import threading
 import networkx as nx
 import matplotlib.pyplot as plt
+from PIL.ImageOps import expand
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class ServerGUI:
     def __init__(self, socialGraph, title="Socialtec Server"):
         self.window = tk.Tk()
         self.window.title(title)
-        self.window.geometry("600x400")
+        self.window.geometry("650x450")
+        self.window.config(bg="#c0c0c0")
         self.socialGraph = socialGraph  # referencia al grafo
         self.logMessages = [] # lista para almacenar mensajes del server
         self.logActive = False # rastrear si el log está activo
 
         import matplotlib
         matplotlib.use('TkAgg') # usar con tkinter
+        plt.style.use('classic')
+
+        self.retroFont = font.Font(family="Courier New", size=10, weight="bold") # fuente para los botones
 
         # main frame
-        self.mainFrame = tk.Frame(self.window)
-        self.mainFrame.pack(fill=tk.BOTH, expand=True)
+        self.mainFrame = tk.Frame(self.window, relief="raised", borderwidth=3, bg="#c0c0c0")
+        self.mainFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
         # frame de navegacion
-        self.navFrame = tk.Frame(self.mainFrame, bg = 'lightgray')
-        self.navFrame.pack(side = tk.TOP, fill = tk.X)
+        self.navFrame = tk.Frame(self.mainFrame, borderwidth=2, relief="sunken", bg="#c0c0c0")
+        self.navFrame.pack(side = tk.TOP, fill = tk.X, padx=5, pady=5)
 
         # frame del contenido principal (frame de frames)
-        self.contentFrame = tk.Frame(self.mainFrame)
-        self.contentFrame.pack(side = tk.TOP, fill = tk.BOTH, expand = True)
+        self.contentFrame = tk.Frame(self.mainFrame, borderwidth=2, relief="sunken", bg="#c0c0c0")
+        self.contentFrame.pack(side = tk.TOP, fill = tk.BOTH, expand = True, padx=5, pady=5)
 
         self.createNavButtons() # crear botones
         self.createLogFrame() # iniciar con el frame del log
 
+    def createRetroButtons(self, parent, text, command): # funcion auxiliar para botones
+        return tk.Button(parent, text=text, command = command, relief="raised", borderwidth=3, font=self.retroFont, bg="#c0c0c0", width=15, height=2, activebackground="#d4d0c8")
+
     def createNavButtons(self): # funcion para crear botones
-        logButton = tk.Button(self.navFrame, text = "Servidor", command = self.createLogFrame)
-        logButton.pack(side = tk.LEFT, padx = 5, pady = 5)
+        buttonFrame = tk.Frame(self.navFrame, bg="#c0c0c0")
+        buttonFrame.pack(expand=True, pady=10)  # centra el frame dentro de navframe
 
-        graphButton = tk.Button(self.navFrame, text = "Grafo Social", command = self.createGraphFrame)
-        graphButton.pack(side = tk.LEFT, padx = 5, pady = 5)
+        logButton = self.createRetroButtons(buttonFrame, text="Servidor", command=self.createLogFrame)
+        logButton.pack(side=tk.LEFT, padx=5, pady=5)
 
-        statsButton = tk.Button(self.navFrame, text="Estadísticas", command=self.createStatsFrame)
+        graphButton = self.createRetroButtons(buttonFrame, text="Grafo Social", command=self.createGraphFrame)
+        graphButton.pack(side=tk.LEFT, padx=5, pady=5)
+
+        statsButton = self.createRetroButtons(buttonFrame, text="Estadísticas", command=self.createStatsFrame)
         statsButton.pack(side=tk.LEFT, padx=5, pady=5)
 
-        searchPathButton = tk.Button(self.navFrame, text="Buscar Path", command=self.createSeachFriendsPath)
+        searchPathButton = self.createRetroButtons(buttonFrame, text="Buscar Path", command=self.createSeachFriendsPath)
         searchPathButton.pack(side=tk.LEFT, padx=5, pady=5)
 
     def createSeachFriendsPath(self): # crea el frame de las stats
@@ -104,7 +115,10 @@ class ServerGUI:
             width=70,
             height=20,
             bg="black",
-            fg="green"
+            fg="#00ff00",
+            font=("Courier New", 10),
+            relief="sunken",
+            borderwidth=2
         )
         self.logArea.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
@@ -126,6 +140,8 @@ class ServerGUI:
         # crear figura de matplotlib
         fig, ax = plt.subplots(figsize=(10, 8))
 
+        fig.patch.set_facecolor('#f0f0f0') # color del fondo
+
         # crear grafo dirigido
         G = nx.DiGraph()
 
@@ -134,9 +150,9 @@ class ServerGUI:
             for friend in friends:
                 # verificar si la amistad es mutua
                 if user in self.socialGraph.graph.get(friend, set()):
-                    G.add_edge(user, friend, color = 'grey', style = 'solid', width = 2)
+                    G.add_edge(user, friend, color = '#808080', style = 'solid', width = 2)
                 else:
-                    G.add_edge(user, friend, color = 'grey', style = 'dashed', width = 1)
+                    G.add_edge(user, friend, color = '#000080', style = 'dashed', width = 2)
 
         pos = nx.spring_layout(G, k=0.5) # calcular posiciones de los nodos
 
@@ -144,19 +160,28 @@ class ServerGUI:
         ax.clear()
 
         # dibujar nodos
-        nx.draw_networkx_nodes(G, pos, node_color = 'grey', node_size = 300, ax = ax)
+        nx.draw_networkx_nodes(G, pos, node_color = '#c0c0c0', node_size = 1000, ax = ax, edgecolors="#000080", linewidths=1)
 
         # nombre de nodos
-        nx.draw_networkx_labels(G, pos, font_size = 8, ax = ax)
+        nx.draw_networkx_labels(G, pos, font_size = 12, ax = ax, font_family="Courier New", font_weight="bold")
 
         # dibujar aristas con diferentes estilos
         edges = G.edges() # obtiene las aristas
         edgeColors = [G[u][v]['color'] for u, v in edges]
         edgeStyles = [G[u][v]['style'] for u, v in edges]
         edgeWidths = [G[u][v]['width'] for u, v in edges]
-        nx.draw_networkx_edges(G, pos, edge_color = edgeColors, style = edgeStyles, width = edgeWidths, arrows = True, arrowsize = 10, ax = ax)
+        nx.draw_networkx_edges(G, pos, edge_color = edgeColors, style = edgeStyles, width = edgeWidths, arrows = True, arrowsize = 15, min_source_margin=10, min_target_margin=15)
 
         ax.axis('off') # oculta ejes visuales (un cuadro)
+
+        # frame para info
+        infoFrame = tk.Frame(self.contentFrame, relief="raised", borderwidth=2, bg="#c0c0c0")
+        infoFrame.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=5)
+
+        # label de info
+        tk.Label(infoFrame, text="Info:", font=self.retroFont, bg="#c0c0c0").pack(side=tk.LEFT, padx=5)
+        tk.Label(infoFrame, text="── Amistad mutua", font=self.retroFont, bg="#c0c0c0", fg="#808080").pack(side=tk.LEFT, padx=5)
+        tk.Label(infoFrame, text="--- Amistad unidireccional", font=self.retroFont, bg="#c0c0c0", fg="#000080").pack(side=tk.LEFT, padx=5)
 
         # incrustar grafico de matplotlib en tkinter
         canvas = FigureCanvasTkAgg(fig, master = self.contentFrame)
@@ -171,8 +196,8 @@ class ServerGUI:
 
         self.logActive = False
 
-        statsLabel = tk.Label(self.contentFrame, text="Estadísticas")
-        statsLabel.pack()
+        statsLabel = tk.Label(self.contentFrame, text="Estadísticas\n\n(En desarrollo)", font=self.retroFont, bg="#c0c0c0", relief="sunken", borderwidth=2, padx=20, pady=20)
+        statsLabel.pack(expand=True)
 
     def logMessage(self, message): # funcion para mostrar los mensajes del server
         self.logMessages.append(message)

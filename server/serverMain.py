@@ -6,6 +6,7 @@ import time
 import sys # para redirigir prints
 import os
 import json
+from datetime import datetime
 
 class SocialGraph:
     def __init__(self):
@@ -94,9 +95,11 @@ class ServerApplication:
         def __init__(self, gui):
             self.gui = gui
 
-        def write(self, message):
+        def write(self, message): # funcion para escribir el mensaje del server
             if message.strip():
-                self.gui.logMessage(message.strip())
+                timestamp = datetime.now().strftime('[%H:%M:%S]:')
+                formattedMessage = f"> {timestamp} {message.strip()}"
+                self.gui.logMessage(formattedMessage)
 
         def flush(self):
             pass  # necesario para compatibilidad con sys.stdout
