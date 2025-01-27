@@ -62,29 +62,40 @@ class ServerGUI:
 
         self.logActive = False
 
-        pathLabel = tk.Label(self.contentFrame, text="Buscar Path")
-        pathLabel.pack()
+        # frame para la zona de busqueda
+        searchFrame = tk.Frame(self.contentFrame, relief="sunken", borderwidth=2, bg='#c0c0c0')
+        searchFrame.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
 
-        # entry para amigo "a"
-        entryFriendA = tk.Entry(self.contentFrame, width=25)
-        entryFriendA.pack()
+        # titilo
+        pathLabel = tk.Label(searchFrame, text="Buscar Path entre Usuarios", font=self.retroFont, bg='#c0c0c0')
+        pathLabel.pack(pady=10)
 
-        # entry para amigo "b"
-        entryFriendB = tk.Entry(self.contentFrame, width=25)
-        entryFriendB.pack()
+        # frame para entries
+        entryFrame = tk.Frame(searchFrame, bg='#c0c0c0')
+        entryFrame.pack(pady=10)
 
-        # boton de buscar path
-        searchPathButton = tk.Button(self.contentFrame, text="Buscar Path", command=self.searchPath)
-        searchPathButton.pack()
+        # labels y entries para usuarios
+        tk.Label(entryFrame, text="Usuario A:", font=self.retroFont, bg='#c0c0c0').grid(row=0, column=0, padx=5, pady=5)
+        entryFriendA = tk.Entry(entryFrame, width=25, relief="sunken", font=self.retroFont)
+        entryFriendA.grid(row=0, column=1, padx=5, pady=5)
 
-    def searchPath(self):
-        userA = self.contentFrame.winfo_children()[1].get() # entryFriendA
-        userB = self.contentFrame.winfo_children()[2].get() # entryFriendB
+        tk.Label( entryFrame, text="Usuario B:", font=self.retroFont, bg='#c0c0c0' ).grid(row=1, column=0, padx=5, pady=5)
+        entryFriendB = tk.Entry( entryFrame, width=25, relief="sunken", font=self.retroFont)
+        entryFriendB.grid(row=1, column=1, padx=5, pady=5)
+
+        # botón de busqueda
+        searchButton = tk.Button( searchFrame, text="Buscar", command=lambda: self.searchPath(entryFriendA.get(), entryFriendB.get()), relief="raised", borderwidth=3, font=self.retroFont, bg='#c0c0c0', width=15 )
+        searchButton.pack(pady=10)
+
+        # frame para resultados
+        self.resultFrame = tk.Frame(searchFrame, bg='#c0c0c0')
+        self.resultFrame.pack(pady=10, fill=tk.X)
+
+    def searchPath(self, userA, userB):
 
         # limpiar resultados previos
-        for widget in self.contentFrame.winfo_children():
-            if isinstance(widget, tk.Label) and widget.cget('text') != "Buscar Path":
-                widget.destroy()
+        for widget in self.resultFrame.winfo_children():
+            widget.destroy()
 
         # buscar path
         path = self.socialGraph.findFriendPath(userA, userB)
@@ -93,14 +104,15 @@ class ServerGUI:
         if path:
             if len(path) > 2:
                 result = f"Path encontrado: {' -> '.join(path)}"
+            elif {path[0]} == {path[1]}:
+                result = f"Son la misma persona"
             else:
                 result = f"Son amigos directos: {path[0]} y {path[1]}"
-
-            resultLabel = tk.Label(self.contentFrame, text=result)
-            resultLabel.pack()
         else:
-            resultLabel = tk.Label(self.contentFrame, text="No existe path")
-            resultLabel.pack()
+            result = "No existe path entre los usuarios"
+
+        resultLabel = tk.Label(self.resultFrame, text=result, font=self.retroFont, bg='#c0c0c0', relief="sunken", borderwidth=1, padx=10, pady=10)
+        resultLabel.pack(fill=tk.X, padx=20)
 
     def createLogFrame(self): # funcion para crear el frame del log
         for widget in self.contentFrame.winfo_children(): # borrar todo lo que haya
