@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from clientMain import ClientApplication
+import json
 
 class ClientGUI:
     def __init__(self):
@@ -163,12 +164,67 @@ class ClientGUI:
             if not results:
                 tk.Label(self.resultsFrame, text="no hay gente").pack()
             else:
-                for user in results:
+                for user in results: # crea un frame para cada ususario encontrado
                     userFrame = tk.Frame(self.resultsFrame)
                     userFrame.pack(fill = 'x', pady = 5)
-                    tk.Label(userFrame, text=f"{user['nombre']} {user['apellido']} (@{user['username']})").pack(side='left')
+
+                    # muestra la info del usario buscado
+                    tk.Label(userFrame, text = f"{user['nombre']} {user['apellido']} (@{user['username']})").pack(side = 'left')
+
+                    # boton de añadir amigo
+                    if user['username'] != self.client.currentUser:
+                        buttonText = self.getFriendshipButtonText(user['username'])
+                        friendButton = tk.Button(userFrame, text = buttonText, command = lambda u = user['username']: self.toggleFriendship(u))
+                        friendButton.pack(side='right')
+
         except Exception:
             print("error")
+
+    def toggleFriendship(self, username): # verifica si son amigos para eliminar o añadir
+        try:
+            currentUser = self.client.currentUser
+
+            # enviar solicitud al servidor para añadir o eliminar amigo
+            self.client.connectToServer()
+            self.client.sendMessage(f"ISFRIEND:{currentUser}:{username}")
+            response = self.client.receiveMessage()
+
+            # parsear la respuesta del servidor
+            result = json.loads(response)
+
+            # determinar si agregar o eliminar amigo
+            if result.get('status') == 'success' and result.get('isFriend'):
+                result = self.client.removeFriend(currentUser, username) # si son amigos entonces "eliminar amigo"
+            else:
+                result = self.client.addFriend(currentUser, username) # sino "añadir amigo"
+
+            if result['status'] == 'success':
+                messagebox.showinfo("Éxito", result['message'])
+                self.search()  # actualizar la vista
+            else:
+                messagebox.showerror("Error", result['message'])
+
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    def getFriendshipButtonText(self, username):  # funcion para cambiar el boton de estado (eliminar/añadir amigo)
+        try:
+            # enviar una solicitud al servidor para verificar si son amigos
+            self.client.connectToServer()
+            self.client.sendMessage(f"ISFRIEND:{self.client.currentUser}:{username}")
+            response = self.client.receiveMessage()
+
+            # parsear la respuesta del servidor
+            result = json.loads(response)
+
+            # si son amigos el boton dice eliminar amigo
+            if result.get('status') == 'success' and result.get('isFriend'):
+                return "Eliminar amigo"
+            else:
+                return "Añadir amigo"
+        except Exception as e:
+            print(f"Error verificando amistad: {e}")
+            return "Añadir amigo"
 
     def start(self):
         self.window.mainloop()

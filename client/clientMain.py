@@ -10,8 +10,11 @@ class ClientApplication:
         self.clientSocket = None
         self.networkManager = NetworkManager(host, port)
         self.authManager = AuthManager()
+        self.currentUser = None
+
         if autoconnect:
             self.connectToServer()
+
     def connectToServer(self): # funcion para que el cliente se conecte el server
         if not self.clientSocket:
             try:
@@ -53,6 +56,10 @@ class ClientApplication:
 
             # parsear respuesta json del servidor
             responseData = json.loads(serverResponse)
+
+            if responseData['status'] == 'success':
+                self.currentUser = username # guardar el usuario actual
+
             return responseData  # retornar json completo
         except Exception as e:
             return {
@@ -93,6 +100,20 @@ class ClientApplication:
         except Exception as e:
             print(f"Error de búsqueda: {e}")
             return []
+
+    def addFriend(self, sender, receiver): # funcion para enviar solicitud al server de añadir amigo
+        try:
+            self.sendMessage(f"ADDFRIEND:{sender}:{receiver}") # envia la solicitud
+            response = self.receiveMessage()
+            return json.loads(response) # guarda la respuesta del server
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Error añadiendo amigo: {str(e)}"
+            }
+
+    def removeFriend(self, sender, receiver):
+        pass
 
     def closeConnection(self): # funcion para cerrar la conexion
         if self.clientSocket:
