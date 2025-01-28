@@ -76,6 +76,10 @@ class ClientGUI:
         self.regPasswordEntry = tk.Entry(registerFrame, show="*", width = 25)
         self.regPasswordEntry.pack()
 
+        # boton para añadir foto de perfil
+        photoButton = tk.Button(registerFrame, text="Añadir foto de perfil")
+        photoButton.pack(pady=5)
+
         # boton de registrarse
         register_btn = tk.Button(registerFrame, text = "Crear cuenta", command = self.register)
         register_btn.pack(pady=10)
@@ -83,6 +87,15 @@ class ClientGUI:
         # boton de volver al login
         back_btn = tk.Button(registerFrame, text = "Volver al login", command = self.createLoginFrame)
         back_btn.pack()
+
+    def createProfileFrame(self, username, is_current_user=False): # frame para los perfiles de usuario
+        for widget in self.window.winfo_children():
+            widget.destroy()
+
+        profileFrame = tk.Frame(self.window)
+        profileFrame.pack(expand=True, fill='both')
+
+        tk.Button(profileFrame, text="Volver", command=self.createSearchFrame).pack()
 
     def login(self): # intenta loguear usuario
         username = self.usernameEntry.get()
@@ -130,8 +143,17 @@ class ClientGUI:
         for widget in self.window.winfo_children():
             widget.destroy()
 
+        # frame de busqueda
         searchFrame = tk.Frame(self.window)
         searchFrame.pack(expand=True, fill='both')
+
+        # frame para el header (titulo y boton de perfil)
+        headerFrame = tk.Frame(searchFrame)
+        headerFrame.pack(fill='x')
+
+        # titulo y boton de perfil
+        tk.Label(headerFrame, text="Buscar Personas").pack(side='left')
+        tk.Button(headerFrame, text="Mi Perfil", command=lambda: self.createProfileFrame(self.client.currentUser, is_current_user=True)).pack(side='right')
 
         tk.Label(searchFrame, text="Buscar Personas").pack()
 
@@ -170,6 +192,14 @@ class ClientGUI:
 
                     # muestra la info del usario buscado
                     tk.Label(userFrame, text = f"{user['nombre']} {user['apellido']} (@{user['username']})").pack(side = 'left')
+
+                    # frame para el boton de perfil de los usuarios
+                    buttonFrame = tk.Frame(userFrame)
+                    buttonFrame.pack(side='right')
+
+                    # boton de ver perfil
+                    tk.Button(buttonFrame, text="Ver perfil",
+                              command=lambda u=user['username']: self.createProfileFrame(u)).pack(side='right')
 
                     # boton de añadir amigo
                     if user['username'] != self.client.currentUser:
