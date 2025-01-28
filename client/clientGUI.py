@@ -46,7 +46,7 @@ class ClientGUI:
         self.passwordEntry = tk.Entry(loginFrame, width=40, show="*")
         self.passwordEntry.pack(fill="x", ipady=10)
 
-        # Remember me and Lost password frame
+        # remember me frame
         optionsFrame = tk.Frame(loginFrame, bg="#c0c0c0")
         optionsFrame.pack(fill="x", pady=15)
 
@@ -59,9 +59,7 @@ class ClientGUI:
         lostPassButton.pack(side="right")
 
         # boton de loguearse
-        loginButton = tk.Button(loginFrame, text="Login",
-                                command=self.login, relief="groove",
-                                bg="#d3d3d3", width=30)
+        loginButton = tk.Button(loginFrame, text="Login", command=self.login, relief="groove", bg="#d3d3d3", width=30)
         loginButton.pack(pady=15, ipady=5)
 
         # boton de registrarse y frame
@@ -171,30 +169,45 @@ class ClientGUI:
             widget.destroy()
 
         # frame de busqueda
-        searchFrame = tk.Frame(self.window)
+        searchFrame = tk.Frame(self.window, bg="#c0c0c0", relief="raised", borderwidth=2)
         searchFrame.pack(expand=True, fill='both')
 
         # frame para el header (titulo y boton de perfil)
-        headerFrame = tk.Frame(searchFrame)
-        headerFrame.pack(fill='x')
+        headerFrame = tk.Frame(searchFrame, bg="navy", height=30)
+        headerFrame.pack(fill="x")
+        headerFrame.pack_propagate(False)
 
-        # titulo y boton de perfil
-        tk.Label(headerFrame, text="Buscar Personas").pack(side='left')
-        tk.Button(headerFrame, text="Mi Perfil", command=lambda: self.createProfileFrame(self.client.currentUser, is_current_user=True)).pack(side='right')
+        # frame para contenido del header
+        titleBarFrame = tk.Frame(headerFrame, bg="navy")
+        titleBarFrame.pack(fill="x", padx=5)
 
-        tk.Label(searchFrame, text="Buscar Personas").pack()
+        # titulo
+        titleLabel = tk.Label(titleBarFrame, text="Search Users", fg="white", bg="navy", font=("System", 12, "bold"))
+        titleLabel.pack(side="left", pady=5)
+
+        # boton de perfil
+        profileBtn = tk.Button(titleBarFrame, text="My Profile", relief="raised", bg="#c0c0c0",
+                               activebackground="#d4d0c8", borderwidth=2, font=("System", 9),
+                               command=lambda: self.createProfileFrame(self.client.currentUser, is_current_user=True))
+        profileBtn.pack(side="right", pady=2, padx=2)
+
+        # frame para el entry de buscar
+        searchBoxFrame = tk.Frame(searchFrame, bg="#c0c0c0", relief="sunken", borderwidth=2)
+        searchBoxFrame.pack(fill="x", padx=10, pady=10)
 
         # espacio de buscar
-        self.searchEntry = tk.Entry(searchFrame, width=25)
-        self.searchEntry.pack()
+        tk.Label(searchBoxFrame, text="Enter username:", bg="#c0c0c0", font=("System", 9), anchor="w" ).pack(fill="x", padx=5, pady=(5, 0))
+        self.searchEntry = tk.Entry( searchBoxFrame, relief="sunken", bg="white", font=("System", 9), borderwidth=2 )
+        self.searchEntry.pack(fill="x", padx=5, pady=5)
 
         # boton de buscar
-        searchButton = tk.Button(searchFrame, text="Buscar", command=self.search)
-        searchButton.pack()
+        searchButton = tk.Button(searchBoxFrame, text="Search", relief="raised", bg="#c0c0c0",
+                                 activebackground="#d4d0c8", borderwidth=2, font=("System", 9), command=self.search)
+        searchButton.pack(pady=(0, 5))
 
         # para mostrar resultados
-        self.resultsFrame = tk.Frame(searchFrame)
-        self.resultsFrame.pack(expand=True, fill='both')
+        self.resultsFrame = tk.Frame(searchFrame, bg="#c0c0c0", relief="sunken", borderwidth=2)
+        self.resultsFrame.pack(expand=True, fill="both", padx=10, pady=(0, 10))
 
     def search(self): # funcion para buscar personas
         searchTerm = self.searchEntry.get()
@@ -214,25 +227,27 @@ class ClientGUI:
                 tk.Label(self.resultsFrame, text="no hay gente").pack()
             else:
                 for user in results: # crea un frame para cada ususario encontrado
-                    userFrame = tk.Frame(self.resultsFrame)
-                    userFrame.pack(fill = 'x', pady = 5)
+                    userFrame = tk.Frame( self.resultsFrame, bg="#c0c0c0", relief="sunken", borderwidth=1 )
+                    userFrame.pack(fill="x", padx=5, pady=2)
 
                     # muestra la info del usario buscado
-                    tk.Label(userFrame, text = f"{user['nombre']} {user['apellido']} (@{user['username']})").pack(side = 'left')
+                    tk.Label(userFrame, text=f"{user['nombre']} {user['apellido']}", bg="#c0c0c0",
+                             font=("System", 8), anchor="w").pack(side="left", padx=5, pady=2)
 
                     # frame para el boton de perfil de los usuarios
-                    buttonFrame = tk.Frame(userFrame)
-                    buttonFrame.pack(side='right')
+                    buttonFrame = tk.Frame(userFrame, bg="#c0c0c0")
+                    buttonFrame.pack(side="right", padx=2)
 
                     # boton de ver perfil
-                    tk.Button(buttonFrame, text="Ver perfil",
-                              command=lambda u=user['username']: self.createProfileFrame(u)).pack(side='right')
+                    tk.Button(buttonFrame, text="👤", font=("Arial", 10), relief="raised", bg="#c0c0c0", width=2,
+                              command=lambda u=user['username']: self.createProfileFrame(u)).pack(side="right", padx=2, pady=2)
 
                     # boton de añadir amigo
                     if user['username'] != self.client.currentUser:
                         buttonText = self.getFriendshipButtonText(user['username'])
-                        friendButton = tk.Button(userFrame, text = buttonText, command = lambda u = user['username']: self.toggleFriendship(u))
-                        friendButton.pack(side='right')
+                        friendButton = tk.Button(buttonFrame, text=buttonText, font=("Arial", 10),relief="raised", bg="#c0c0c0", width=2,
+                                                 command=lambda u=user['username']: self.toggleFriendship(u))
+                        friendButton.pack(side='right', padx=2)
 
         except Exception:
             print("error")
@@ -276,12 +291,12 @@ class ClientGUI:
 
             # si son amigos el boton dice eliminar amigo
             if result.get('status') == 'success' and result.get('isFriend'):
-                return "Eliminar amigo"
+                return "-"
             else:
-                return "Añadir amigo"
+                return "+"
         except Exception as e:
             print(f"Error verificando amistad: {e}")
-            return "Añadir amigo"
+            return "+"
 
     def start(self):
         self.window.mainloop()
