@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import scrolledtext, Toplevel, Button, font, messagebox
 from clientMain import ClientApplication
 import json
 
@@ -7,10 +7,10 @@ class ClientGUI:
     def __init__(self):
         self.window = tk.Tk()
         self.window.title("SocialTec Client")
-        self.window.geometry("300x400")
+        self.window.geometry("300x450")
+        self.window.config(bg="#c0c0c0")
         self.window.protocol("WM_DELETE_WINDOW", self.onClosing)
         self.client = ClientApplication(autoconnect = False)
-        self.client = ClientApplication()
         self.createLoginFrame()
 
     def onClosing(self):
@@ -20,30 +20,57 @@ class ClientGUI:
         for widget in self.window.winfo_children(): # recorre todos los elementos y los borra
             widget.destroy()
 
-        # frame del login
-        loginFrame = tk.Frame(self.window)
-        loginFrame.pack(expand = True, fill = "both")
+        # frame del contenido principal (frame de frames)
+        self.contentFrame = tk.Frame(self.window, borderwidth=2, relief="sunken", bg="#c0c0c0")
+        self.contentFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+        # header para el titulo
+        headerFrame = tk.Frame(self.contentFrame, bg="navy", height=30)
+        headerFrame.pack(fill="x")
+        headerFrame.pack_propagate(False)
 
         # titulo
-        tk.Label(loginFrame, text = "Login").pack()
+        tk.Label(headerFrame, text="SOCIALTEC", fg="white", bg="navy",font=("Arial", 14, "bold")).pack(pady=5)
+
+        # frame del login
+        loginFrame = tk.Frame(self.contentFrame, bg="#c0c0c0")
+        loginFrame.pack(expand=True, fill="both", padx=10, pady=10)
 
         # usuario
-        tk.Label(loginFrame, text = "Usuario").pack()
-        self.usernameEntry = tk.Entry(loginFrame, width = 25)
-        self.usernameEntry.pack()
+        tk.Label(loginFrame, text="Username", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(20, 5))
+        self.usernameEntry = tk.Entry(loginFrame, width=40)
+        self.usernameEntry.pack(fill="x", ipady=10)
 
         # contraseña
-        tk.Label(loginFrame, text="Contraseña").pack()
-        self.passwordEntry = tk.Entry(loginFrame, width = 25)
-        self.passwordEntry.pack()
+        tk.Label(loginFrame, text="Password", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(15, 5))
+        self.passwordEntry = tk.Entry(loginFrame, width=40, show="*")
+        self.passwordEntry.pack(fill="x", ipady=10)
+
+        # Remember me and Lost password frame
+        optionsFrame = tk.Frame(loginFrame, bg="#c0c0c0")
+        optionsFrame.pack(fill="x", pady=15)
+
+        # para recordar contraseña (estetica)
+        self.rememberVar = tk.BooleanVar()
+        tk.Checkbutton(optionsFrame, text="Remember me", variable=self.rememberVar, bg="#c0c0c0").pack(side="left")
+
+        # olvido contraseña (estetica)
+        lostPassButton = tk.Label(optionsFrame, text="Lost password?", fg="blue", cursor="hand2", bg="#c0c0c0")
+        lostPassButton.pack(side="right")
 
         # boton de loguearse
-        loginButton = tk.Button(loginFrame, text = "Login", command = self.login)
-        loginButton.pack()
+        loginButton = tk.Button(loginFrame, text="Login",
+                                command=self.login, relief="groove",
+                                bg="#d3d3d3", width=30)
+        loginButton.pack(pady=15, ipady=5)
 
-        # boton de registrarse
-        registerButton = tk.Button(loginFrame, text="Registrarse", command = self.createRegisterFrame)
-        registerButton.pack()
+        # boton de registrarse y frame
+        registerFrame = tk.Frame(loginFrame, bg="#c0c0c0")
+        registerFrame.pack(fill="x", pady=10)
+        tk.Label(registerFrame, text="Not registered? ", bg="#c0c0c0").pack(side="left")
+        registerLink = tk.Label(registerFrame, text="Create account", fg="blue", cursor="hand2", bg="#c0c0c0")
+        registerLink.pack(side="left")
+        registerLink.bind("<Button-1>", lambda e: self.createRegisterFrame())
 
     def createRegisterFrame(self): # crea el frame del registro
         for widget in self.window.winfo_children(): # crea el frame del registro
