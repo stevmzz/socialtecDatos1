@@ -91,11 +91,8 @@ class AuthManager:
         searchTerms = searchTerm.lower().split()
 
         for username, userData in users.items():
-            if all(
-                    any(term in campo.lower() for campo in
-                        [userData['nombre'], userData['apellido'], username])
-                    for term in searchTerms
-            ):
+            userFullname = f"{userData['nombre']} {userData['apellido']}".lower()
+            if all(term in userFullname for term in searchTerms):
                 result = {
                     'username': username,
                     'nombre': userData['nombre'],
