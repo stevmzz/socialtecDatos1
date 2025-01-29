@@ -1,7 +1,8 @@
 import tkinter as tk
-from tkinter import scrolledtext, Toplevel, Button, font, messagebox
+from tkinter import scrolledtext, Toplevel, Button, font
 from clientMain import ClientApplication
 import json
+
 
 class ClientGUI:
     def __init__(self):
@@ -10,14 +11,32 @@ class ClientGUI:
         self.window.geometry("300x450")
         self.window.config(bg="#c0c0c0")
         self.window.protocol("WM_DELETE_WINDOW", self.onClosing)
-        self.client = ClientApplication(autoconnect = False)
+        self.client = ClientApplication(autoconnect=False)
         self.createLoginFrame()
 
     def onClosing(self):
-        self.window.destroy() # cerrar ventana principal
+        self.window.destroy()  # cerrar ventana principal
 
-    def createLoginFrame(self): # crea el frame del login
-        for widget in self.window.winfo_children(): # recorre todos los elementos y los borra
+    def showMessage(self, message, isError=False): # funcion para mostrar mensajes en un frame
+        # limpia mensajes anteriores si existen
+        if hasattr(self, 'messageFrame'):
+            self.messageFrame.destroy()
+
+        bgColor = "#ffcccc" if isError else "#ccffcc"  # rojo claro para errores, verde claro para exito
+
+        # crea el frame del mensaje
+        self.messageFrame = tk.Frame(self.window, bg=bgColor, relief="sunken", borderwidth=1)
+        self.messageFrame.pack(side="bottom", fill="x", padx=5, pady=5)
+
+        # muestra el mensaje
+        messageLabel = tk.Label(self.messageFrame, text=message, bg=bgColor, wraplength=250)
+        messageLabel.pack(pady=5)
+
+        # autodestruye el mensaje después de 3 segundos
+        self.window.after(3000, self.messageFrame.destroy)
+
+    def createLoginFrame(self):  # crea el frame del login
+        for widget in self.window.winfo_children():  # recorre todos los elementos y los borra
             widget.destroy()
 
         # frame del contenido principal (frame de frames)
@@ -30,7 +49,7 @@ class ClientGUI:
         headerFrame.pack_propagate(False)
 
         # titulo
-        tk.Label(headerFrame, text="SOCIALTEC", fg="white", bg="navy",font=("Arial", 14, "bold")).pack(pady=5)
+        tk.Label(headerFrame, text="SOCIALTEC", fg="white", bg="navy", font=("Arial", 14, "bold")).pack(pady=5)
 
         # frame del login
         loginFrame = tk.Frame(self.contentFrame, bg="#c0c0c0")
@@ -70,35 +89,35 @@ class ClientGUI:
         registerLink.pack(side="left")
         registerLink.bind("<Button-1>", lambda e: self.createRegisterFrame())
 
-    def createRegisterFrame(self): # crea el frame del registro
-        for widget in self.window.winfo_children(): # crea el frame del registro
-            widget.destroy() # recorre todos los elemtos y los borra
+    def createRegisterFrame(self):  # crea el frame del registro
+        for widget in self.window.winfo_children():  # crea el frame del registro
+            widget.destroy()  # recorre todos los elemtos y los borra
 
         # frame del registro
         registerFrame = tk.Frame(self.window)
-        registerFrame.pack(expand = True, fill = 'both')
+        registerFrame.pack(expand=True, fill='both')
 
         # titulo
-        tk.Label(registerFrame, text = "Registrarse").pack()
+        tk.Label(registerFrame, text="Registrarse").pack()
 
         # nombre
         tk.Label(registerFrame, text="Nombre").pack()
-        self.nameEntry = tk.Entry(registerFrame, width = 25)
+        self.nameEntry = tk.Entry(registerFrame, width=25)
         self.nameEntry.pack()
 
         # apellido
         tk.Label(registerFrame, text="Apellido").pack()
-        self.lastnameEntry = tk.Entry(registerFrame, width = 25)
+        self.lastnameEntry = tk.Entry(registerFrame, width=25)
         self.lastnameEntry.pack()
 
         # usuario
         tk.Label(registerFrame, text="Usuario").pack()
-        self.regUsernameEntry = tk.Entry(registerFrame, width = 25)
+        self.regUsernameEntry = tk.Entry(registerFrame, width=25)
         self.regUsernameEntry.pack()
 
         # contraseña
         tk.Label(registerFrame, text="Contraseña").pack()
-        self.regPasswordEntry = tk.Entry(registerFrame, show="*", width = 25)
+        self.regPasswordEntry = tk.Entry(registerFrame, show="*", width=25)
         self.regPasswordEntry.pack()
 
         # boton para añadir foto de perfil
@@ -106,14 +125,14 @@ class ClientGUI:
         photoButton.pack(pady=5)
 
         # boton de registrarse
-        register_btn = tk.Button(registerFrame, text = "Crear cuenta", command = self.register)
+        register_btn = tk.Button(registerFrame, text="Crear cuenta", command=self.register)
         register_btn.pack(pady=10)
 
         # boton de volver al login
-        back_btn = tk.Button(registerFrame, text = "Volver al login", command = self.createLoginFrame)
+        back_btn = tk.Button(registerFrame, text="Volver al login", command=self.createLoginFrame)
         back_btn.pack()
 
-    def createProfileFrame(self, username, is_current_user=False): # frame para los perfiles de usuario
+    def createProfileFrame(self, username, is_current_user=False):  # frame para los perfiles de usuario
         for widget in self.window.winfo_children():
             widget.destroy()
 
@@ -122,49 +141,49 @@ class ClientGUI:
 
         tk.Button(profileFrame, text="Volver", command=self.createSearchFrame).pack()
 
-    def login(self): # intenta loguear usuario
+    def login(self):  # intenta loguear usuario
         username = self.usernameEntry.get()
         password = self.passwordEntry.get()
 
         if not username or not password:
-            messagebox.showerror("Error", "meta los dos")
+            self.showMessage("Please enter both username and password", isError=True)
             return
 
-        try: # intenta conectar al server
+        try:  # intenta conectar al server
             self.client.connectToServer()
             result = self.client.login(username, password)
 
             if result['status'] == 'success':
-                messagebox.showinfo("Login", result['message'])
+                self.showMessage(result['message'])
                 self.createSearchFrame()
             else:
-                messagebox.showerror("error", result['message'])
+                self.showMessage(result['message'], isError=True)
         except Exception as e:
-            messagebox.showerror("error", str(e))
+            self.showMessage(str(e), isError=True)
 
-    def register(self): # intenta registrar ususario
+    def register(self):  # intenta registrar ususario
         name = self.nameEntry.get()
         lastname = self.lastnameEntry.get()
         username = self.regUsernameEntry.get()
         password = self.regPasswordEntry.get()
 
         if not all([name, lastname, username, password]):
-            messagebox.showerror("Error", "meta todo")
+            self.showMessage("Please complete all required fields", isError=True)
             return
 
-        try: # intenta conectar al server
+        try:  # intenta conectar al server
             self.client.connectToServer()
             result = self.client.register(name, lastname, username, password)
 
             if result['status'] == 'success':
-                messagebox.showinfo("Registration", result['message'])
+                self.showMessage(result['message'])
                 self.createLoginFrame()
             else:
-                messagebox.showerror("Registration Failed", result['message'])
+                self.showMessage(result['message'], isError=True)
         except Exception as e:
-            messagebox.showerror("Connection Error", str(e))
+            self.showMessage(str(e), isError=True)
 
-    def createSearchFrame(self): # crea el frame de la zona de busqueda
+    def createSearchFrame(self):  # crea el frame de la zona de busqueda
         for widget in self.window.winfo_children():
             widget.destroy()
 
@@ -196,8 +215,8 @@ class ClientGUI:
         searchBoxFrame.pack(fill="x", padx=10, pady=10)
 
         # espacio de buscar
-        tk.Label(searchBoxFrame, text="Enter username:", bg="#c0c0c0", font=("System", 9), anchor="w" ).pack(fill="x", padx=5, pady=(5, 0))
-        self.searchEntry = tk.Entry( searchBoxFrame, relief="sunken", bg="white", font=("System", 9), borderwidth=2 )
+        tk.Label(searchBoxFrame, text="Enter username:", bg="#c0c0c0", font=("System", 9), anchor="w").pack(fill="x", padx=5, pady=(5, 0))
+        self.searchEntry = tk.Entry(searchBoxFrame, relief="sunken", bg="white", font=("System", 9), borderwidth=2)
         self.searchEntry.pack(fill="x", padx=5, pady=5)
 
         # boton de buscar
@@ -209,11 +228,11 @@ class ClientGUI:
         self.resultsFrame = tk.Frame(searchFrame, bg="#c0c0c0", relief="sunken", borderwidth=2)
         self.resultsFrame.pack(expand=True, fill="both", padx=10, pady=(0, 10))
 
-    def search(self): # funcion para buscar personas
+    def search(self):  # funcion para buscar personas
         searchTerm = self.searchEntry.get()
 
         if not searchTerm:
-            messagebox.showerror("Error", "meta algo")
+            self.showMessage("Please enter a search term", isError=True)
             return
 
         try:
@@ -224,10 +243,10 @@ class ClientGUI:
                 widget.destroy()
 
             if not results:
-                tk.Label(self.resultsFrame, text="no hay gente").pack()
+                self.showMessage("No users found", isError=True)
             else:
-                for user in results: # crea un frame para cada ususario encontrado
-                    userFrame = tk.Frame( self.resultsFrame, bg="#c0c0c0", relief="sunken", borderwidth=1 )
+                for user in results:  # crea un frame para cada ususario encontrado
+                    userFrame = tk.Frame(self.resultsFrame, bg="#c0c0c0", relief="sunken", borderwidth=1)
                     userFrame.pack(fill="x", padx=5, pady=2)
 
                     # muestra la info del usario buscado
@@ -240,19 +259,21 @@ class ClientGUI:
 
                     # boton de ver perfil
                     tk.Button(buttonFrame, text="👤", font=("Arial", 10), relief="raised", bg="#c0c0c0", width=2,
-                              command=lambda u=user['username']: self.createProfileFrame(u)).pack(side="right", padx=2, pady=2)
+                              command=lambda u=user['username']: self.createProfileFrame(u)).pack(side="right", padx=2,
+                                                                                                  pady=2)
 
                     # boton de añadir amigo
                     if user['username'] != self.client.currentUser:
                         buttonText = self.getFriendshipButtonText(user['username'])
-                        friendButton = tk.Button(buttonFrame, text=buttonText, font=("Arial", 10),relief="raised", bg="#c0c0c0", width=2,
+                        friendButton = tk.Button(buttonFrame, text=buttonText, font=("Arial", 10), relief="raised",
+                                                 bg="#c0c0c0", width=2,
                                                  command=lambda u=user['username']: self.toggleFriendship(u))
                         friendButton.pack(side='right', padx=2)
 
         except Exception:
-            print("error")
+            self.showMessage("Unable to retrieve user data. Please try again", isError=True)
 
-    def toggleFriendship(self, username): # verifica si son amigos para eliminar o añadir
+    def toggleFriendship(self, username):  # verifica si son amigos para eliminar o añadir
         try:
             currentUser = self.client.currentUser
 
@@ -266,18 +287,18 @@ class ClientGUI:
 
             # determinar si agregar o eliminar amigo
             if result.get('status') == 'success' and result.get('isFriend'):
-                result = self.client.removeFriend(currentUser, username) # si son amigos entonces "eliminar amigo"
+                result = self.client.removeFriend(currentUser, username)  # si son amigos entonces "eliminar amigo"
             else:
-                result = self.client.addFriend(currentUser, username) # sino "añadir amigo"
+                result = self.client.addFriend(currentUser, username)  # sino "añadir amigo"
 
             if result['status'] == 'success':
-                messagebox.showinfo("Éxito", result['message'])
+                self.showMessage(result['message'])
                 self.search()  # actualizar la vista
             else:
-                messagebox.showerror("Error", result['message'])
+                self.showMessage(result['message'], isError=True)
 
         except Exception as e:
-            messagebox.showerror("Error", str(e))
+            self.showMessage(str(e), isError=True)
 
     def getFriendshipButtonText(self, username):  # funcion para cambiar el boton de estado (eliminar/añadir amigo)
         try:
