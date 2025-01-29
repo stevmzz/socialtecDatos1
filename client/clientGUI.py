@@ -126,17 +126,17 @@ class ClientGUI:
         registerFrame.pack(expand=True, fill="both", padx=10, pady=10)
 
         # nombre
-        tk.Label(registerFrame, text="Nombre", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(20, 5))
+        tk.Label(registerFrame, text="Name", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(20, 5))
         self.nameEntry = tk.Entry(registerFrame, width=40)
         self.nameEntry.pack(fill="x", ipady=5)
 
         # apellido
-        tk.Label(registerFrame, text="Apellido", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(15, 5))
+        tk.Label(registerFrame, text="Lastname", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(15, 5))
         self.lastnameEntry = tk.Entry(registerFrame, width=40)
         self.lastnameEntry.pack(fill="x", ipady=5)
 
         # usuario
-        tk.Label(registerFrame, text="Usuario", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(15, 5))
+        tk.Label(registerFrame, text="Username", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(15, 5))
         self.regUsernameEntry = tk.Entry(registerFrame, width=40)
         self.regUsernameEntry.pack(fill="x", ipady=5)
 
@@ -144,7 +144,7 @@ class ClientGUI:
         passwordFrame = tk.Frame(registerFrame, bg="#c0c0c0")
         passwordFrame.pack(fill="x", pady=(15, 5))
 
-        tk.Label(passwordFrame, text="Contraseña", bg="#c0c0c0", anchor="w").pack(fill="x")
+        tk.Label(passwordFrame, text="Password", bg="#c0c0c0", anchor="w").pack(fill="x")
 
         # frame para el contenido de la contraseña
         passwordContentFrame = tk.Frame(registerFrame, bg="#c0c0c0")
@@ -164,12 +164,12 @@ class ClientGUI:
         buttonsFrame.pack(fill="x", pady=20)
 
         # boton para añadir foto de perfil
-        photoButton = tk.Button(buttonsFrame, text="Añadir foto de perfil", relief="raised",
+        photoButton = tk.Button(buttonsFrame, text="Add profile picture", relief="raised",
                                 bg="#d3d3d3", width=30)
         photoButton.pack(pady=5, ipady=5)
 
         # boton de registrarse
-        registerButton = tk.Button(buttonsFrame, text="Crear cuenta", command=self.register,
+        registerButton = tk.Button(buttonsFrame, text="Create account", command=self.register,
                                    relief="groove", bg="#d3d3d3", width=30)
         registerButton.pack(pady=5, ipady=5)
 
@@ -177,8 +177,8 @@ class ClientGUI:
         backFrame = tk.Frame(registerFrame, bg="#c0c0c0")
         backFrame.pack(fill="x", pady=10)
 
-        tk.Label(backFrame, text="¿Ya tienes cuenta? ", bg="#c0c0c0").pack(side="left")
-        backLink = tk.Label(backFrame, text="Iniciar sesión", fg="blue", cursor="hand2", bg="#c0c0c0")
+        tk.Label(backFrame, text="Do you already have an account?", bg="#c0c0c0").pack(side="left")
+        backLink = tk.Label(backFrame, text="Log in", fg="blue", cursor="hand2", bg="#c0c0c0")
         backLink.pack(side="left")
         backLink.bind("<Button-1>", lambda e: self.createLoginFrame())
 
