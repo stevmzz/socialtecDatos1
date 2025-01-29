@@ -8,7 +8,7 @@ class ClientGUI:
     def __init__(self):
         self.window = tk.Tk()
         self.window.title("SocialTec Client")
-        self.window.geometry("300x450")
+        self.window.geometry("350x650")
         self.window.config(bg="#c0c0c0")
         self.window.protocol("WM_DELETE_WINDOW", self.onClosing)
         self.client = ClientApplication(autoconnect=False)
@@ -30,7 +30,7 @@ class ClientGUI:
 
         # muestra el mensaje
         messageLabel = tk.Label(self.messageFrame, text=message, bg=bgColor, wraplength=250)
-        messageLabel.pack(pady=5)
+        messageLabel.pack(pady=20)
 
         # autodestruye el mensaje después de 3 segundos
         self.window.after(3000, self.messageFrame.destroy)
@@ -106,37 +106,52 @@ class ClientGUI:
         registerLink.bind("<Button-1>", lambda e: self.createRegisterFrame())
 
     def createRegisterFrame(self):  # crea el frame del registro
-        for widget in self.window.winfo_children():  # crea el frame del registro
-            widget.destroy()  # recorre todos los elemtos y los borra
+        for widget in self.window.winfo_children():  # recorre todos los elementos y los borra
+            widget.destroy()
 
-        # frame del registro
-        registerFrame = tk.Frame(self.window)
-        registerFrame.pack(expand=True, fill='both')
+        # frame del contenido principal (frame de frames)
+        self.contentFrame = tk.Frame(self.window, borderwidth=2, relief="sunken", bg="#c0c0c0")
+        self.contentFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+        # header para el titulo
+        headerFrame = tk.Frame(self.contentFrame, bg="navy", height=30)
+        headerFrame.pack(fill="x")
+        headerFrame.pack_propagate(False)
 
         # titulo
-        tk.Label(registerFrame, text="Registrarse").pack()
+        tk.Label(headerFrame, text="CREATE ACCOUNT", fg="white", bg="navy", font=("Arial", 14, "bold")).pack(pady=5)
+
+        # frame del registro
+        registerFrame = tk.Frame(self.contentFrame, bg="#c0c0c0")
+        registerFrame.pack(expand=True, fill="both", padx=10, pady=10)
 
         # nombre
-        tk.Label(registerFrame, text="Nombre").pack()
-        self.nameEntry = tk.Entry(registerFrame, width=25)
-        self.nameEntry.pack()
+        tk.Label(registerFrame, text="Nombre", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(20, 5))
+        self.nameEntry = tk.Entry(registerFrame, width=40)
+        self.nameEntry.pack(fill="x", ipady=5)
 
         # apellido
-        tk.Label(registerFrame, text="Apellido").pack()
-        self.lastnameEntry = tk.Entry(registerFrame, width=25)
-        self.lastnameEntry.pack()
+        tk.Label(registerFrame, text="Apellido", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(15, 5))
+        self.lastnameEntry = tk.Entry(registerFrame, width=40)
+        self.lastnameEntry.pack(fill="x", ipady=5)
 
         # usuario
-        tk.Label(registerFrame, text="Usuario").pack()
-        self.regUsernameEntry = tk.Entry(registerFrame, width=25)
-        self.regUsernameEntry.pack()
+        tk.Label(registerFrame, text="Usuario", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(15, 5))
+        self.regUsernameEntry = tk.Entry(registerFrame, width=40)
+        self.regUsernameEntry.pack(fill="x", ipady=5)
 
-        # contraseña
-        tk.Label(registerFrame, text="Contraseña").pack()
-        passwordContentFrame = tk.Frame(registerFrame)
+        # frame para contraseña
+        passwordFrame = tk.Frame(registerFrame, bg="#c0c0c0")
+        passwordFrame.pack(fill="x", pady=(15, 5))
+
+        tk.Label(passwordFrame, text="Contraseña", bg="#c0c0c0", anchor="w").pack(fill="x")
+
+        # frame para el contenido de la contraseña
+        passwordContentFrame = tk.Frame(registerFrame, bg="#c0c0c0")
         passwordContentFrame.pack(fill="x")
-        self.regPasswordEntry = tk.Entry(passwordContentFrame, width=25, show="*")
-        self.regPasswordEntry.pack()
+
+        self.regPasswordEntry = tk.Entry(passwordContentFrame, width=35, show="*")
+        self.regPasswordEntry.pack(side="left", ipady=5, fill="x", expand=True)
 
         # boton de mostrar/ocultar contraseña
         showPasswordBtn = tk.Button(passwordContentFrame, text="👁", relief="raised",
@@ -144,17 +159,28 @@ class ClientGUI:
                                     command=lambda: self.togglePasswordVisibility(self.regPasswordEntry))
         showPasswordBtn.pack(side="right", padx=10)
 
+        # frame para botones de perfil y registro
+        buttonsFrame = tk.Frame(registerFrame, bg="#c0c0c0")
+        buttonsFrame.pack(fill="x", pady=20)
+
         # boton para añadir foto de perfil
-        photoButton = tk.Button(registerFrame, text="Añadir foto de perfil")
-        photoButton.pack(pady=5)
+        photoButton = tk.Button(buttonsFrame, text="Añadir foto de perfil", relief="raised",
+                                bg="#d3d3d3", width=30)
+        photoButton.pack(pady=5, ipady=5)
 
         # boton de registrarse
-        register_btn = tk.Button(registerFrame, text="Crear cuenta", command=self.register)
-        register_btn.pack(pady=10)
+        registerButton = tk.Button(buttonsFrame, text="Crear cuenta", command=self.register,
+                                   relief="groove", bg="#d3d3d3", width=30)
+        registerButton.pack(pady=5, ipady=5)
 
-        # boton de volver al login
-        back_btn = tk.Button(registerFrame, text="Volver al login", command=self.createLoginFrame)
-        back_btn.pack()
+        # frame para volver al login
+        backFrame = tk.Frame(registerFrame, bg="#c0c0c0")
+        backFrame.pack(fill="x", pady=10)
+
+        tk.Label(backFrame, text="¿Ya tienes cuenta? ", bg="#c0c0c0").pack(side="left")
+        backLink = tk.Label(backFrame, text="Iniciar sesión", fg="blue", cursor="hand2", bg="#c0c0c0")
+        backLink.pack(side="left")
+        backLink.bind("<Button-1>", lambda e: self.createLoginFrame())
 
     def createProfileFrame(self, username, is_current_user=False):  # frame para los perfiles de usuario
         for widget in self.window.winfo_children():

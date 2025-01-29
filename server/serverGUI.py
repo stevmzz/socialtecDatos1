@@ -10,7 +10,7 @@ class ServerGUI:
     def __init__(self, socialGraph, title="Socialtec Server"):
         self.window = tk.Tk()
         self.window.title(title)
-        self.window.geometry("650x450")
+        self.window.geometry("650x650")
         self.window.config(bg="#c0c0c0")
         self.socialGraph = socialGraph  # referencia al grafo
         self.logMessages = [] # lista para almacenar mensajes del server
