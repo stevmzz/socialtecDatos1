@@ -6,6 +6,7 @@ import time
 import sys # para redirigir prints
 import os
 import json
+from datetime import datetime
 
 class SocialGraph:
     def __init__(self):
@@ -60,6 +61,10 @@ class SocialGraph:
         return list(self.graph.get(username, set()))
 
     def findFriendPath(self, user1, user2): # funcion para buscar el path entre amigos
+        # verificar si son el mismo usuario
+        if user1 == user2:
+            return [user1, user1]
+
         # verificar si los usuarios existen en el grafo
         if user1 not in self.graph or user2 not in self.graph:
             return None
@@ -94,9 +99,11 @@ class ServerApplication:
         def __init__(self, gui):
             self.gui = gui
 
-        def write(self, message):
+        def write(self, message): # funcion para escribir el mensaje del server
             if message.strip():
-                self.gui.logMessage(message.strip())
+                timestamp = datetime.now().strftime('[%H:%M:%S]:')
+                formattedMessage = f"> {timestamp} {message.strip()}"
+                self.gui.logMessage(formattedMessage)
 
         def flush(self):
             pass  # necesario para compatibilidad con sys.stdout

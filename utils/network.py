@@ -16,7 +16,7 @@ class NetworkManager:
         self.serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # reutiliza socket
         self.serverSocket.bind((self.host, self.port)) # asocia el socket con un puerto y un host
         self.serverSocket.listen(100) # permite que el server acepte hasta 100 conecciones
-        print(f"Servidor iniciado en ( {self.host} ) en el puerto ( {self.port} )")
+        print(f"Servidor iniciado en [ {self.host} ] en el puerto [ {self.port} ]")
 
         try: # acepta conexiones entrantes
             while True:
