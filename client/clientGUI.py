@@ -35,6 +35,12 @@ class ClientGUI:
         # autodestruye el mensaje después de 3 segundos
         self.window.after(3000, self.messageFrame.destroy)
 
+    def togglePasswordVisibility(self, entry_widget): # funcion para la visibilidad de la contraseña
+        if entry_widget.cget('show') == '':
+            entry_widget.config(show='*')
+        else:
+            entry_widget.config(show='')
+
     def createLoginFrame(self):  # crea el frame del login
         for widget in self.window.winfo_children():  # recorre todos los elementos y los borra
             widget.destroy()
@@ -61,9 +67,19 @@ class ClientGUI:
         self.usernameEntry.pack(fill="x", ipady=10)
 
         # contraseña
-        tk.Label(loginFrame, text="Password", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(15, 5))
-        self.passwordEntry = tk.Entry(loginFrame, width=40, show="*")
-        self.passwordEntry.pack(fill="x", ipady=10)
+        passwordFrame = tk.Frame(loginFrame, bg="#c0c0c0")
+        passwordFrame.pack(fill="x", pady=(15, 5))
+        passwordContentFrame = tk.Frame(loginFrame, bg="#c0c0c0")
+        passwordContentFrame.pack(fill="x")
+        tk.Label(passwordFrame, text="Password", bg="#c0c0c0", anchor="w").pack(fill="x", pady=(15, 5))
+        self.passwordEntry = tk.Entry(passwordContentFrame, width=35, show="*")
+        self.passwordEntry.pack(side="left", ipady=10, fill="x", expand=True, pady=2)
+
+        # boton de mostrar/ocultar contraseña
+        showPasswordBtn = tk.Button(passwordContentFrame, text="👁", relief="raised",
+                                    bg="#d3d3d3", width=2, height=1,
+                                    command=lambda: self.togglePasswordVisibility(self.passwordEntry))
+        showPasswordBtn.pack(side="right", padx=10)
 
         # remember me frame
         optionsFrame = tk.Frame(loginFrame, bg="#c0c0c0")
@@ -117,8 +133,16 @@ class ClientGUI:
 
         # contraseña
         tk.Label(registerFrame, text="Contraseña").pack()
-        self.regPasswordEntry = tk.Entry(registerFrame, show="*", width=25)
+        passwordContentFrame = tk.Frame(registerFrame)
+        passwordContentFrame.pack(fill="x")
+        self.regPasswordEntry = tk.Entry(passwordContentFrame, width=25, show="*")
         self.regPasswordEntry.pack()
+
+        # boton de mostrar/ocultar contraseña
+        showPasswordBtn = tk.Button(passwordContentFrame, text="👁", relief="raised",
+                                    bg="#d3d3d3", width=2, height=1,
+                                    command=lambda: self.togglePasswordVisibility(self.regPasswordEntry))
+        showPasswordBtn.pack(side="right", padx=10)
 
         # boton para añadir foto de perfil
         photoButton = tk.Button(registerFrame, text="Añadir foto de perfil")
