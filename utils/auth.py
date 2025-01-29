@@ -29,25 +29,25 @@ class AuthManager:
         if not all([name, lastname, user, password]):
             return {
                 "status": "error",
-                "message": "Todos los campos son obligatorios"
+                "message": "All fields are required"
             }
 
         if user in users:
             return {
                 "status": "error",
-                "message": "El nombre de usario ya existe"
+                "message": "Username already exists"
             }
 
         if len(user) < 4:
             return {
                 "status": "error",
-                "message": "El nombre de usuario debe tener al menos 4 caracteres"
+                "message": "Username must be at least 4 characters long"
             }
 
         if len(password) < 8:
             return {
                 "status": "error",
-                "message": "La contraseña debe tener al menos 8 caracteres"
+                "message": "Password must be at least 8 characters long"
             }
 
         ############### validaciones ###############
@@ -61,7 +61,7 @@ class AuthManager:
 
         return {
             "status": "success",
-            "message": "Usuario registrado exitosamente"
+            "message": "User successfully registered"
         }
 
     def loginUsers(self, user, password): # iniciar sesion con un usario
@@ -71,18 +71,18 @@ class AuthManager:
         if user not in users: # verificar si existe el usario
             return {
                 "status": "error",
-                "message": "Usuario no encontrado"
+                "message": "User not found"
             }
 
         if users[user]["contraseña"] != password:  # verificar si la contraseña coincide
             return {
                 "status": "error",
-                "message": "Contraseña incorrecta"
+                "message": "Invalid username or password. Please try again"
             }
 
         return { # inicio de sesión exitoso
             "status": "success",
-            "message": "Inicio de sesión exitoso"
+            "message": "Login successful! Welcome back"
         }
 
     def searchUsers(self, searchTerm): # buscar usuario en el json
@@ -91,11 +91,8 @@ class AuthManager:
         searchTerms = searchTerm.lower().split()
 
         for username, userData in users.items():
-            if all(
-                    any(term in campo.lower() for campo in
-                        [userData['nombre'], userData['apellido'], username])
-                    for term in searchTerms
-            ):
+            userFullname = f"{userData['nombre']} {userData['apellido']}".lower()
+            if all(term in userFullname for term in searchTerms):
                 result = {
                     'username': username,
                     'nombre': userData['nombre'],

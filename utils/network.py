@@ -88,7 +88,7 @@ class NetworkManager:
 
                 return json.dumps({
                     "status": "success",
-                    "message": f"{sender} añadió a {receiver} como amigo"
+                    "message": f"[{sender}] add [{receiver}] like a friend"
                 })
         except Exception as e:
             return json.dumps({

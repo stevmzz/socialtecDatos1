@@ -10,7 +10,7 @@ class ServerGUI:
     def __init__(self, socialGraph, title="Socialtec Server"):
         self.window = tk.Tk()
         self.window.title(title)
-        self.window.geometry("650x450")
+        self.window.geometry("650x650")
         self.window.config(bg="#c0c0c0")
         self.socialGraph = socialGraph  # referencia al grafo
         self.logMessages = [] # lista para almacenar mensajes del server
@@ -63,23 +63,23 @@ class ServerGUI:
         self.logActive = False
 
         # frame para la zona de busqueda
-        searchFrame = tk.Frame(self.contentFrame, relief="sunken", borderwidth=2, bg='#c0c0c0')
+        searchFrame = tk.Frame(self.contentFrame, relief="sunken", borderwidth=2, bg='grey')
         searchFrame.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
 
         # titilo
-        pathLabel = tk.Label(searchFrame, text="Buscar Path entre Usuarios", font=self.retroFont, bg='#c0c0c0')
+        pathLabel = tk.Label(searchFrame, text="Buscar Path entre Usuarios", font=self.retroFont, bg='grey')
         pathLabel.pack(pady=10)
 
         # frame para entries
-        entryFrame = tk.Frame(searchFrame, bg='#c0c0c0')
+        entryFrame = tk.Frame(searchFrame, bg='grey')
         entryFrame.pack(pady=10)
 
         # labels y entries para usuarios
-        tk.Label(entryFrame, text="Usuario A:", font=self.retroFont, bg='#c0c0c0').grid(row=0, column=0, padx=5, pady=5)
+        tk.Label(entryFrame, text="Usuario A:", font=self.retroFont, bg='grey').grid(row=0, column=0, padx=5, pady=5)
         entryFriendA = tk.Entry(entryFrame, width=25, relief="sunken", font=self.retroFont)
         entryFriendA.grid(row=0, column=1, padx=5, pady=5)
 
-        tk.Label( entryFrame, text="Usuario B:", font=self.retroFont, bg='#c0c0c0' ).grid(row=1, column=0, padx=5, pady=5)
+        tk.Label( entryFrame, text="Usuario B:", font=self.retroFont, bg='grey' ).grid(row=1, column=0, padx=5, pady=5)
         entryFriendB = tk.Entry( entryFrame, width=25, relief="sunken", font=self.retroFont)
         entryFriendB.grid(row=1, column=1, padx=5, pady=5)
 
@@ -88,7 +88,7 @@ class ServerGUI:
         searchButton.pack(pady=10)
 
         # frame para resultados
-        self.resultFrame = tk.Frame(searchFrame, bg='#c0c0c0')
+        self.resultFrame = tk.Frame(searchFrame, bg='grey')
         self.resultFrame.pack(pady=10, fill=tk.X)
 
     def searchPath(self, userA, userB):
@@ -209,15 +209,15 @@ class ServerGUI:
         self.logActive = False
 
         # frame para stats
-        statsFrame = tk.Frame(self.contentFrame, relief="sunken", borderwidth=2, bg='#c0c0c0')
+        statsFrame = tk.Frame(self.contentFrame, relief="sunken", borderwidth=2, bg='grey')
         statsFrame.pack(expand=True, fill=tk.BOTH, padx=20, pady=20)
 
         # titulo
-        titleLabel = tk.Label(statsFrame, text="Estadísticas de Socialtec", font=self.retroFont, bg='#c0c0c0')
+        titleLabel = tk.Label(statsFrame, text="Estadísticas de Socialtec", font=self.retroFont, bg='grey')
         titleLabel.pack(pady=10)
 
         # frame para mostrar stats
-        resultsFrame = tk.Frame(statsFrame, bg='#c0c0c0')
+        resultsFrame = tk.Frame(statsFrame, bg='grey')
         resultsFrame.pack(pady=10, fill=tk.BOTH, expand=True)
 
         # crear frames individuales para cada estadistica
