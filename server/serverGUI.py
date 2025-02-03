@@ -202,6 +202,37 @@ class ServerGUI:
         canvas.draw() # dibujar canvas
         plt.close(fig) # limpiar grafico
 
+    def calculateGraphStats(self):
+        """
+        Calculate statistics about users and their friendships.
+        Returns tuple of (user_with_min, user_with_max, average)
+        """
+        if not self.socialGraph.graph:
+            return ("No users", "No users", 0)
+
+        # Dictionary to store friend counts
+        friend_counts = {}
+
+        # Count friends for each user
+        for user, friends in self.socialGraph.graph.items():
+            friend_counts[user] = len(friends)
+
+        if not friend_counts:
+            return ("No users", "No users", 0)
+
+        # Find user with minimum friends
+        min_user = min(friend_counts.items(), key=lambda x: x[1])
+        # Find user with maximum friends
+        max_user = max(friend_counts.items(), key=lambda x: x[1])
+        # Calculate average
+        avg_friends = sum(friend_counts.values()) / len(friend_counts)
+
+        return (
+            f"{min_user[0]} ({min_user[1]} amigos)",
+            f"{max_user[0]} ({max_user[1]} amigos)",
+            f"{avg_friends:.2f}"
+        )
+
     def createStatsFrame(self):
         for widget in self.contentFrame.winfo_children():
             widget.destroy()
@@ -220,21 +251,27 @@ class ServerGUI:
         resultsFrame = tk.Frame(statsFrame, bg='grey')
         resultsFrame.pack(pady=10, fill=tk.BOTH, expand=True)
 
+        # Calcular estadísticas
+        min_friends, max_friends, avg_friends = self.calculateGraphStats()
+
         # crear frames individuales para cada estadistica
         # usuario con mas amigos
         maxFriendsFrame = tk.Frame(resultsFrame, relief="raised", borderwidth=2, bg='#c0c0c0')
         maxFriendsFrame.pack(fill=tk.X, padx=20, pady=5)
-        tk.Label(maxFriendsFrame, text="Usuario con más amigos:", font=self.retroFont, bg='#c0c0c0').pack(side=tk.LEFT, padx=10, pady=10)
+        tk.Label(maxFriendsFrame, text=f"Usuario con más amigos: {max_friends}",
+                 font=self.retroFont, bg='#c0c0c0').pack(side=tk.LEFT, padx=10, pady=10)
 
         # usuario con menos amigos
         minFriendsFrame = tk.Frame(resultsFrame, relief="raised", borderwidth=2, bg='#c0c0c0')
         minFriendsFrame.pack(fill=tk.X, padx=20, pady=5)
-        tk.Label(minFriendsFrame, text="Usuario con menos amigos:", font=self.retroFont, bg='#c0c0c0').pack(side=tk.LEFT, padx=10, pady=10)
+        tk.Label(minFriendsFrame, text=f"Usuario con menos amigos: {min_friends}",
+                 font=self.retroFont, bg='#c0c0c0').pack(side=tk.LEFT, padx=10, pady=10)
 
         # promedio de amigos
         avgFriendsFrame = tk.Frame(resultsFrame, relief="raised", borderwidth=2, bg='#c0c0c0')
         avgFriendsFrame.pack(fill=tk.X, padx=20, pady=5)
-        tk.Label(avgFriendsFrame, text="Promedio de amigos por usuario:", font=self.retroFont, bg='#c0c0c0').pack(side=tk.LEFT, padx=10, pady=10)
+        tk.Label(avgFriendsFrame, text=f"Promedio de amigos por usuario: {avg_friends}",
+                 font=self.retroFont, bg='#c0c0c0').pack(side=tk.LEFT, padx=10, pady=10)
 
     def logMessage(self, message): # funcion para mostrar los mensajes del server
         self.logMessages.append(message)

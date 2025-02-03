@@ -54,8 +54,27 @@ class SocialGraph:
             return True
         return False
 
-    def removeFriendship(self, user1, user2): # elimina una relacion de amistad entre dos usuarios
-        pass
+    def removeFriend(self, user1, user2):
+        try:
+            if user1 in self.graph and user2 in self.graph[user1]:
+                self.graph[user1].remove(user2)
+                if user2 in self.graph and user1 in self.graph[user2]:
+                    self.graph[user2].remove(user1)
+                self.saveFriendships()  # Guardar los cambios
+                return {
+                    "status": "success",
+                    "message": f"Amistad entre {user1} y {user2} eliminada."
+                }
+            else:
+                return {
+                    "status": "error",
+                    "message": "No existe amistad entre estos usuarios."
+                }
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Error eliminando amistad: {str(e)}"
+            }
 
     def getFriends(self, username): # obtiene la lista de amigos de un usuario
         return list(self.graph.get(username, set()))
