@@ -182,14 +182,142 @@ class ClientGUI:
         backLink.pack(side="left")
         backLink.bind("<Button-1>", lambda e: self.createLoginFrame())
 
-    def createProfileFrame(self, username, is_current_user=False):  # frame para los perfiles de usuario
+    def merge_sort(self, arr):
+        """
+        Implementación de Merge Sort para ordenar la lista de amigos.
+        Ordena basándose en el nombre completo (nombre + apellido).
+        """
+        if len(arr) <= 1:
+            return arr
+
+        mid = len(arr) // 2
+        left = self.merge_sort(arr[:mid])
+        right = self.merge_sort(arr[mid:])
+
+        return self.merge(left, right)
+
+    def merge(self, left, right):
+        """
+        Función auxiliar para combinar dos listas ordenadas.
+        """
+        result = []
+        i = j = 0
+
+        while i < len(left) and j < len(right):
+            # Comparar por nombre completo
+            left_full_name = f"{left[i]['nombre']} {left[i]['apellido']}".lower()
+            right_full_name = f"{right[j]['nombre']} {right[j]['apellido']}".lower()
+
+            if left_full_name <= right_full_name:
+                result.append(left[i])
+                i += 1
+            else:
+                result.append(right[j])
+                j += 1
+
+        result.extend(left[i:])
+        result.extend(right[j:])
+        return result
+
+    def createProfileFrame(self, username, is_current_user=False):
+        # Limpiar la ventana principal
         for widget in self.window.winfo_children():
             widget.destroy()
 
-        profileFrame = tk.Frame(self.window)
+        # Frame principal
+        profileFrame = tk.Frame(self.window, bg="#c0c0c0")
         profileFrame.pack(expand=True, fill='both')
 
-        tk.Button(profileFrame, text="Volver", command=self.createSearchFrame).pack()
+        # Header
+        headerFrame = tk.Frame(profileFrame, bg="navy", height=30)
+        headerFrame.pack(fill="x")
+        headerFrame.pack_propagate(False)
+
+        # Frame para el contenido del header (título y botón de volver)
+        titleBarFrame = tk.Frame(headerFrame, bg="navy")
+        titleBarFrame.pack(fill="x", padx=5)
+
+        # Botón para volver a la búsqueda
+        backButton = tk.Button(titleBarFrame, text="←", relief="raised", bg="#c0c0c0",
+                               activebackground="#d4d0c8", borderwidth=2, font=("System", 9),
+                               command=self.createSearchFrame)
+        backButton.pack(side="left", pady=2, padx=2)
+
+        # Título
+        titleLabel = tk.Label(titleBarFrame, text="Profile", fg="white", bg="navy", font=("System", 12, "bold"))
+        titleLabel.pack(side="left", pady=5, padx=5)
+
+        # Frame para información del perfil
+        infoFrame = tk.Frame(profileFrame, bg="#c0c0c0", relief="sunken", borderwidth=2)
+        infoFrame.pack(fill="x", padx=10, pady=10)
+
+        try:
+            # Obtener información del usuario
+            self.client.connectToServer()
+            searchMessage = f"SEARCH:{username}"
+            print(f"Enviando búsqueda: {searchMessage}")  # Debug
+            self.client.sendMessage(searchMessage)
+            response = self.client.receiveMessage()
+            print(f"Respuesta de búsqueda: {response}")  # Debug
+            users = json.loads(response)
+
+            if users:
+                user = users[0]  # Asumimos que el primer usuario es el correcto
+                # Mostrar información del usuario
+                nameLabel = tk.Label(infoFrame, text=f"Name: {user['nombre']} {user['apellido']}",
+                                     bg="#c0c0c0", font=("System", 10, "bold"))
+                nameLabel.pack(anchor="w", padx=10, pady=5)
+
+                usernameLabel = tk.Label(infoFrame, text=f"Username: @{user['username']}",
+                                         bg="#c0c0c0", font=("System", 10))
+                usernameLabel.pack(anchor="w", padx=10, pady=5)
+
+                # Frame para lista de amigos
+                friendsFrame = tk.Frame(profileFrame, bg="#c0c0c0", relief="sunken", borderwidth=2)
+                friendsFrame.pack(fill="both", expand=True, padx=10, pady=10)
+
+                # Título de sección de amigos
+                friendsTitle = tk.Label(friendsFrame, text="Friends List", bg="#c0c0c0",
+                                        font=("System", 10, "bold"))
+                friendsTitle.pack(pady=5)
+
+                # Área de scroll para la lista de amigos
+                friendsList = scrolledtext.ScrolledText(friendsFrame, height=15, width=40,
+                                                        font=("System", 9))
+                friendsList.pack(padx=5, pady=5)
+
+                try:
+                    # Obtener lista de amigos
+                    friendsMessage = f"GETFRIENDS:{username}"
+                    print(f"Enviando solicitud de amigos: {friendsMessage}")  # Debug
+                    self.client.sendMessage(friendsMessage)
+                    friends_response = self.client.receiveMessage()
+                    print(f"Respuesta de amigos: {friends_response}")  # Debug
+                    friends = json.loads(friends_response)
+
+                    if friends:
+                        # Ordenar amigos usando merge sort
+                        sorted_friends = self.merge_sort(friends)
+
+                        # Mostrar amigos ordenados
+                        for friend in sorted_friends:
+                            friendsList.insert(tk.END,
+                                               f"{friend['nombre']} {friend['apellido']} (@{friend['username']})\n")
+                    else:
+                        friendsList.insert(tk.END, "No friends added yet")
+
+                    friendsList.config(state='disabled')  # Hacer el texto de solo lectura
+
+                except Exception as e:
+                    print(f"Error cargando amigos: {e}")  # Debug
+                    friendsList.insert(tk.END, "Error loading friends list")
+                    friendsList.config(state='disabled')
+            else:
+                tk.Label(infoFrame, text="Could not load user information", bg="#c0c0c0", fg="red").pack(pady=10)
+
+        except Exception as e:
+            print(f"Error en perfil: {e}")  # Debug
+            tk.Label(infoFrame, text="Error loading profile", bg="#c0c0c0", fg="red").pack(pady=10)
 
     def login(self):  # intenta loguear usuario
         username = self.usernameEntry.get()
@@ -323,32 +451,50 @@ class ClientGUI:
         except Exception:
             self.showMessage("Unable to retrieve user data. Please try again", isError=True)
 
-    def toggleFriendship(self, username):  # verifica si son amigos para eliminar o añadir
+    def toggleFriendship(self, username):  # Verifica si son amigos para eliminar o añadir
         try:
             currentUser = self.client.currentUser
 
-            # enviar solicitud al servidor para añadir o eliminar amigo
+            # Conectar al servidor y enviar solicitud para comprobar si son amigos
             self.client.connectToServer()
             self.client.sendMessage(f"ISFRIEND:{currentUser}:{username}")
             response = self.client.receiveMessage()
 
-            # parsear la respuesta del servidor
-            result = json.loads(response)
+            if response:
+                try:
+                    # Parsear la respuesta del servidor
+                    result = json.loads(response)
 
-            # determinar si agregar o eliminar amigo
-            if result.get('status') == 'success' and result.get('isFriend'):
-                result = self.client.removeFriend(currentUser, username)  # si son amigos entonces "eliminar amigo"
-            else:
-                result = self.client.addFriend(currentUser, username)  # sino "añadir amigo"
+                    # Verificar si la respuesta es válida
+                    if isinstance(result, dict) and 'status' in result:
+                        # Verificar si la solicitud fue exitosa y si son amigos
+                        if result['status'] == 'success':
+                            if result.get('isFriend', False):  # Si son amigos, eliminarlos
+                                result = self.client.removeFriend(currentUser, username)
+                            else:  # Si no son amigos, añadirlos
+                                result = self.client.addFriend(currentUser, username)
 
-            if result['status'] == 'success':
-                self.showMessage(result['message'])
-                self.search()  # actualizar la vista
+                            # Verificar el resultado de la operación
+                            if result and isinstance(result, dict) and result.get('status') == 'success':
+                                self.showMessage(result.get('message'))  # Mostrar mensaje
+                                self.search()  # Actualizar la vista
+                            else:
+                                # Si la respuesta no es exitosa, mostrar error
+                                self.showMessage(result.get('message', 'Error desconocido'), isError=True)
+                        else:
+                            # Si el estado de la respuesta no es 'success', mostrar error
+                            self.showMessage(result.get('message', 'Error al verificar amistad'), isError=True)
+                    else:
+                        self.showMessage("Respuesta inválida del servidor", isError=True)
+                except json.JSONDecodeError:
+                    # Si no se puede decodificar la respuesta como JSON
+                    self.showMessage("Error en el formato de la respuesta del servidor", isError=True)
             else:
-                self.showMessage(result['message'], isError=True)
+                self.showMessage("No se recibió respuesta del servidor.", isError=True)
 
         except Exception as e:
-            self.showMessage(str(e), isError=True)
+            # Manejar excepciones y mostrar un mensaje de error
+            self.showMessage(f"Error al gestionar amistad: {str(e)}", isError=True)
 
     def getFriendshipButtonText(self, username):  # funcion para cambiar el boton de estado (eliminar/añadir amigo)
         try:
@@ -371,3 +517,4 @@ class ClientGUI:
 
     def start(self):
         self.window.mainloop()
+

@@ -52,6 +52,10 @@ class NetworkManager:
                     response = self.handleAddFriend(message)
                 elif message.startswith("ISFRIEND:"):
                     response = self.handleIsFriend(message)
+                elif message.startswith("REMOVEFRIEND"):
+                    response = self.handleRemoveFriend(message)
+                elif message.startswith("GETFRIENDS:"):
+                    response = self.handleGetFriends(message)
                 else:
                     response = "Recibido"
 
@@ -96,6 +100,24 @@ class NetworkManager:
                 "message": f"Error añadiendo amigo: {str(e)}"
             })
 
+    def handleRemoveFriend(self, message):
+        try:
+            _, sender, receiver = message.split(":")
+            from server.serverMain import SocialGraph
+            socialGraph = SocialGraph()
+            socialGraph.loadFriendships()
+
+            # Eliminar la amistad
+            result = socialGraph.removeFriend(sender, receiver)
+
+            # Si la eliminación fue exitosa
+            return json.dumps(result)
+        except Exception as e:
+            return json.dumps({
+                "status": "error",
+                "message": f"Error verificando amistad: {str(e)}"
+            })
+
     def handleIsFriend(self, message):
         try:
             _, user1, user2 = message.split(":")
@@ -115,5 +137,29 @@ class NetworkManager:
                 "message": f"Error verificando amistad: {str(e)}"
             })
 
-    def handleRemoveFriend(self, message):
-        pass
+    def handleGetFriends(self, message):
+        try:
+            _, username = message.split(":")
+            from server.serverMain import SocialGraph
+            socialGraph = SocialGraph()
+            socialGraph.loadFriendships()
+
+            # Obtener lista de amigos
+            friends = socialGraph.getFriends(username)
+
+            # Obtener información completa de cada amigo
+            friends_info = []
+            for friend_username in friends:
+                # Buscar la información completa del usuario
+                friend_data = self.authManager.searchUsers(friend_username)
+                if friend_data:
+                    # Si encontramos el usuario, lo añadimos a la lista
+                    for user in friend_data:
+                        if user['username'] == friend_username:
+                            friends_info.append(user)
+                            break
+
+            return json.dumps(friends_info)
+        except Exception as e:
+            print(f"Error obteniendo amigos: {e}")
+            return json.dumps([])

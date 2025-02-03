@@ -84,12 +84,11 @@ class ClientApplication:
                 "message": f"Registration error: {str(e)}"
             }
 
-    def searchUsers(self, searchTerm): # funcion para buscar usuarios
+    def searchUsers(self, searchTerm):
         try:
-            self.sendMessage(f"SEARCH:{searchTerm}") # envia la peticion de buscar
+            self.sendMessage(f"SEARCH:{searchTerm}")
             response = self.receiveMessage()
 
-            # manejar respuesta vacia o no valida
             if not response or response == "[]":
                 return []
 
@@ -100,6 +99,7 @@ class ClientApplication:
         except Exception as e:
             print(f"Error de búsqueda: {e}")
             return []
+
 
     def addFriend(self, sender, receiver): # funcion para enviar solicitud al server de añadir amigo
         try:
@@ -113,7 +113,32 @@ class ClientApplication:
             }
 
     def removeFriend(self, sender, receiver):
-        pass
+        try:
+            self.sendMessage(f"REMOVEFRIEND:{sender}:{receiver}")
+            response = self.receiveMessage()  # Obtener la respuesta del servidor
+
+            if response:
+                response_data = json.loads(response)
+                return response_data
+            else:
+                return {
+                    "status": "error",
+                    "message": "No se recibió respuesta del servidor"
+                }
+        except Exception as e:
+            return {
+                "status": "error",
+                "message": f"Error eliminando amistad: {str(e)}"
+            }
+
+    def getFriends(self, username):
+        try:
+            self.sendMessage(f"GETFRIENDS:{username}")
+            response = self.receiveMessage()
+            return json.loads(response)
+        except Exception as e:
+            print(f"Error getting friends: {e}")
+            return []
 
     def closeConnection(self): # funcion para cerrar la conexion
         if self.clientSocket:

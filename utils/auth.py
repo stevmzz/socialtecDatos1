@@ -1,36 +1,29 @@
+# Servidor/auth.py
+from passlib.hash import pbkdf2_sha256
 import json
 import os
 
 class AuthManager:
-    def __init__(self, usersFile = 'users.json'):
+    def __init__(self, usersFile='users.json'):
         self.userFile = usersFile
+        if not os.path.exists(self.userFile):
+            with open(self.userFile, 'w', encoding='utf-8') as f:
+                json.dump({}, f, ensure_ascii=False)
 
-        if not os.path.exists(self.userFile): # si no existe el archivo de usarios crearlo
-            with open(self.userFile, 'w') as f:
-                json.dump({}, f)
-
-    def loadUsers(self): # carga usarios desde archivo json
+    def loadUsers(self):
         try:
-            with open(self.userFile, 'r') as f:
+            with open(self.userFile, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
 
-    def saveUsers(self, users): # guardar usarios en al archivo json
-        with open(self.userFile, 'w') as f:
-            json.dump(users, f, indent=4)
+    def saveUsers(self, users):
+        with open(self.userFile, 'w', encoding='utf-8') as f:
+            json.dump(users, f, indent=4, ensure_ascii=False)
 
-    def registerUsers(self, name, lastname, user, password): # registra un usario
+    def registerUsers(self, name, lastname, user, password):
         users = self.loadUsers()
         user = user.lower().strip()
-
-        ############### validaciones ###############
-
-        if not all([name, lastname, user, password]):
-            return {
-                "status": "error",
-                "message": "All fields are required"
-            }
 
         if user in users:
             return {
@@ -38,24 +31,13 @@ class AuthManager:
                 "message": "Username already exists"
             }
 
-        if len(user) < 4:
-            return {
-                "status": "error",
-                "message": "Username must be at least 4 characters long"
-            }
-
-        if len(password) < 8:
-            return {
-                "status": "error",
-                "message": "Password must be at least 8 characters long"
-            }
-
-        ############### validaciones ###############
+        # Hash the password using PBKDF2
+        hashed_password = pbkdf2_sha256.hash(password)
 
         users[user] = {
             "nombre": name,
             "apellido": lastname,
-            "contraseña": password
+            "contraseña": hashed_password
         }
         self.saveUsers(users)
 
@@ -64,40 +46,65 @@ class AuthManager:
             "message": "User successfully registered"
         }
 
-    def loginUsers(self, user, password): # iniciar sesion con un usario
+    def loginUsers(self, user, password):
         users = self.loadUsers()
         user = user.lower().strip()
 
-        if user not in users: # verificar si existe el usario
+        if user not in users:
             return {
                 "status": "error",
                 "message": "User not found"
             }
 
-        if users[user]["contraseña"] != password:  # verificar si la contraseña coincide
+        # Verify the password against the stored hash
+        stored_hash = users[user]["contraseña"]
+        try:
+            if pbkdf2_sha256.verify(password, stored_hash):
+                return {
+                    "status": "success",
+                    "message": "Login successful! Welcome back"
+                }
+            else:
+                return {
+                    "status": "error",
+                    "message": "Invalid username or password. Please try again"
+                }
+        except Exception:
+            # Si la contraseña aún no está hasheada (durante la transición)
+            if password == stored_hash:
+                # Actualizar a hash si coincide la contraseña antigua
+                users[user]["contraseña"] = pbkdf2_sha256.hash(password)
+                self.saveUsers(users)
+                return {
+                    "status": "success",
+                    "message": "Login successful! Welcome back"
+                }
             return {
                 "status": "error",
                 "message": "Invalid username or password. Please try again"
             }
 
-        return { # inicio de sesión exitoso
-            "status": "success",
-            "message": "Login successful! Welcome back"
-        }
-
-    def searchUsers(self, searchTerm): # buscar usuario en el json
+    def searchUsers(self, searchTerm):  # buscar usuario en el json
         users = self.loadUsers()
         results = []
-        searchTerms = searchTerm.lower().split()
+        searchTerm = searchTerm.lower().strip()
 
         for username, userData in users.items():
             userFullname = f"{userData['nombre']} {userData['apellido']}".lower()
-            if all(term in userFullname for term in searchTerms):
-                result = {
+
+            # Buscar en el nombre de usuario
+            if searchTerm in username.lower():
+                results.append({
                     'username': username,
                     'nombre': userData['nombre'],
                     'apellido': userData['apellido']
-                }
-                results.append(result)
+                })
+            # Buscar en el nombre completo
+            elif searchTerm in userFullname:
+                results.append({
+                    'username': username,
+                    'nombre': userData['nombre'],
+                    'apellido': userData['apellido']
+                })
 
         return results
