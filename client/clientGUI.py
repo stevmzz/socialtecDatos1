@@ -220,14 +220,12 @@ class ClientGUI:
         return result
 
     def createProfileFrame(self, username, is_current_user=False):
-        # Crear nueva ventana para el perfil
-        profileWindow = Toplevel(self.window)
-        profileWindow.title("My Profile")
-        profileWindow.geometry("350x500")
-        profileWindow.config(bg="#c0c0c0")
+        # Limpiar la ventana principal
+        for widget in self.window.winfo_children():
+            widget.destroy()
 
-        # Frame principal en la nueva ventana
-        profileFrame = tk.Frame(profileWindow, bg="#c0c0c0")
+        # Frame principal
+        profileFrame = tk.Frame(self.window, bg="#c0c0c0")
         profileFrame.pack(expand=True, fill='both')
 
         # Header
@@ -235,9 +233,19 @@ class ClientGUI:
         headerFrame.pack(fill="x")
         headerFrame.pack_propagate(False)
 
+        # Frame para el contenido del header (título y botón de volver)
+        titleBarFrame = tk.Frame(headerFrame, bg="navy")
+        titleBarFrame.pack(fill="x", padx=5)
+
+        # Botón para volver a la búsqueda
+        backButton = tk.Button(titleBarFrame, text="←", relief="raised", bg="#c0c0c0",
+                               activebackground="#d4d0c8", borderwidth=2, font=("System", 9),
+                               command=self.createSearchFrame)
+        backButton.pack(side="left", pady=2, padx=2)
+
         # Título
-        titleLabel = tk.Label(headerFrame, text="My Profile", fg="white", bg="navy", font=("System", 12, "bold"))
-        titleLabel.pack(pady=5)
+        titleLabel = tk.Label(titleBarFrame, text="Profile", fg="white", bg="navy", font=("System", 12, "bold"))
+        titleLabel.pack(side="left", pady=5, padx=5)
 
         # Frame para información del perfil
         infoFrame = tk.Frame(profileFrame, bg="#c0c0c0", relief="sunken", borderwidth=2)
@@ -310,11 +318,6 @@ class ClientGUI:
         except Exception as e:
             print(f"Error en perfil: {e}")  # Debug
             tk.Label(infoFrame, text="Error loading profile", bg="#c0c0c0", fg="red").pack(pady=10)
-
-        # Botón para cerrar la ventana
-        closeButton = tk.Button(profileFrame, text="Close", command=profileWindow.destroy,
-                                relief="raised", bg="#d3d3d3")
-        closeButton.pack(pady=10)
 
     def login(self):  # intenta loguear usuario
         username = self.usernameEntry.get()
