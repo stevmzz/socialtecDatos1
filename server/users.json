@@ -1,0 +1,32 @@
+{
+    "user123456": {
+        "nombre": "steven",
+        "apellido": "aguilar",
+        "contraseña": "$pbkdf2-sha256$29000$EsKYk/K.l3IOAUDo3bs3hg$7MrzF82eqvmlgx4E8TsHkCbCRYnboXHjAa37AtjY.pM"
+    },
+    "user1234567": {
+        "nombre": "alberto",
+        "apellido": "alvarez",
+        "contraseña": "$pbkdf2-sha256$29000$XOsdY.y997435twbI4Qwpg$OhYEOcmrXhyd8a6qyM6eLW9ZuqHSLHkZ4Y/i3dqHD0M"
+    },
+    "user12345678": {
+        "nombre": "karoll",
+        "apellido": "najera",
+        "contraseña": "$pbkdf2-sha256$29000$RUhpLaX0/n8vRYjx/p8TAg$nNN8BcrmM1Nxfy/RD4pDevmXuoBoPuIXcZ/oraTeY5k"
+    },
+    "user123456789": {
+        "nombre": "fabiola",
+        "apellido": "molina",
+        "contraseña": "$pbkdf2-sha256$29000$7X1vjVEKgbCW8t6719rb2w$jU0OMRwUmnl9BI0cIHpQHI848EXCfFYqpPv5/uakT7o"
+    },
+    "user1234567890": {
+        "nombre": "steven",
+        "apellido": "alberto",
+        "contraseña": "$pbkdf2-sha256$29000$wrgXIsTY.z.ntPb.XwvhPA$OC9QY/kd..eAB8PN0dgjoA1W4UhAtvPV1LI8/sBOjbw"
+    },
+    "useran1234": {
+        "nombre": "maria",
+        "apellido": "Lola",
+        "contraseña": "$pbkdf2-sha256$29000$0BojpPS.d45xLqWUEkLoPQ$92CC/omKILTd/X7THj9AOmx7GYNbzSP3j4HaqJZKhCI"
+    }
+}
